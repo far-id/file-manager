@@ -1,10 +1,11 @@
 import AuthLayout from '@/Layouts/AuthLayout';
 import React from 'react';
 
-export default function MyFiles({ auth }) {
+function MyFiles() {
     return (
-        <AuthLayout>
-            <div>My.Files</div>
-        </AuthLayout>
+        <div>My.Files</div>
     );
 }
+
+MyFiles.layout = (page) => <AuthLayout children={ page } />;
+export default MyFiles; 

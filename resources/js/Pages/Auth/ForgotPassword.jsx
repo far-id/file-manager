@@ -4,7 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, useForm } from '@inertiajs/react';
 
-export default function ForgotPassword({ status }) {
+function ForgotPassword({ status }) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
@@ -48,3 +48,6 @@ export default function ForgotPassword({ status }) {
         </GuestLayout>
     );
 }
+
+ForgotPassword.layout = (page) => <GuestLayout children={ page } />;
+export default ForgotPassword;
