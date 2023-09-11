@@ -47,16 +47,15 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            File::create([
-                'name' => $user->email,
-                'is_folder' => true,
-            ])->saveAsRoot();
+            Auth::login($user);
 
             dispatch(new sendEmailVerificationNotificationJob($user));
 
-            Auth::login($user);
+            File::create([
+                'name' => $user->email,
+                'is_folder' => true,
+            ]);
         });
-
 
         return redirect(RouteServiceProvider::HOME);
     }
