@@ -10,4 +10,27 @@ use Kalnoy\Nestedset\NodeTrait;
 class File extends Model
 {
     use HasFactory, NodeTrait, SoftDeletes;
+
+    protected $fillable = ['name', 'is_folder'];
+
+    protected static function booted()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->created_by = auth()->id();
+            $model->updated_by = auth()->id();
+
+            if ($model->parent) {
+                $model->path = (!$model->parent->isRoot()
+                    ? $model->parent->path . '/'
+                    : '')
+                    . str()->slug($model->name);
+            }
+        });
+
+        static::updating(function ($model) {
+            $model->updated_by = auth()->id();
+        });
+    }
 }

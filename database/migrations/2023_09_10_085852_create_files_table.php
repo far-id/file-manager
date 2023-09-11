@@ -19,7 +19,7 @@ return new class extends Migration
             $table->nestedSet();
             $table->boolean('is_folder');
             $table->string('mime')->nullable();
-            $table->unsignedInteger('size');
+            $table->unsignedInteger('size')->default(0);
             $table->foreignIdFor(User::class, 'created_by');
             $table->foreignIdFor(User::class, 'updated_by');
             $table->timestamps();
