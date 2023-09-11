@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\sendEmailVerificationNotificationJob;
 use App\Models\File;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
@@ -51,7 +52,7 @@ class RegisteredUserController extends Controller
                 'is_folder' => true,
             ])->saveAsRoot();
 
-            event(new Registered($user));
+            dispatch(new sendEmailVerificationNotificationJob($user));
 
             Auth::login($user);
         });
