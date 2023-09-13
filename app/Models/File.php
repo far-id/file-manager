@@ -33,4 +33,9 @@ class File extends Model
             $model->updated_by = auth()->id();
         });
     }
+
+    public function isOwnedBy(int $userId): bool
+    {
+        return $this->created_by == $userId;
+    }
 }

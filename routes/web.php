@@ -32,12 +32,12 @@ Route::get('/dashboard', function () {
 
 Route::controller(FileController::class)
     ->middleware(['auth', 'verified'])
-    ->name('file.')
     ->group(function () {
-        Route::get('my-files', 'myFiles')->name('myFiles');
-        Route::get('trash', 'trash')->name('trash');
-        Route::get('shared-with-me', 'sharedWithMe')->name('sharedWithMe');
-        Route::get('shared=by-me', 'sharedByMe')->name('SharedByMe');
+    Route::get('my-files', 'myFiles')->name('file.myFiles');
+    Route::post('folder/create', 'storeFolder')->name('folder.create');
+    Route::get('trash', 'trash')->name('file.trash');
+    Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');
+    Route::get('shared=by-me', 'sharedByMe')->name('file.SharedByMe');
     });
 
 
