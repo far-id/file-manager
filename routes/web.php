@@ -33,7 +33,7 @@ Route::get('/dashboard', function () {
 Route::controller(FileController::class)
     ->middleware(['auth', 'verified'])
     ->group(function () {
-    Route::get('my-files', 'myFiles')->name('file.myFiles');
+    Route::get('my-files/{folder?}', 'myFiles')->name('file.myFiles');
     Route::post('folder/create', 'storeFolder')->name('folder.create');
     Route::get('trash', 'trash')->name('file.trash');
     Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');

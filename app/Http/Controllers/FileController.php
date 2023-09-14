@@ -13,9 +13,17 @@ class FileController extends Controller
     {
     }
 
-    public function myFiles()
+    public function myFiles(string $folder = null)
     {
-        $folder = $this->fileService->getRoot();
+        if ($folder) {
+            $folder = File::query()
+                ->where('path', $folder)
+                ->where('created_by', auth()->id())
+                ->where('is_folder', 1)
+                ->firstOrFail();
+        } else {
+            $folder = $this->fileService->getRoot();
+        }
 
         $files = File::query()
             ->where('created_by', auth()->id())

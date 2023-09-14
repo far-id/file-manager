@@ -1,9 +1,14 @@
 import AuthLayout from '@/Layouts/AuthLayout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import React from 'react';
 
 function MyFiles({ files }) {
-    console.log(files)
+    const openFolder = (file) => {
+        if (!file.is_folder) {
+            return;
+        }
+        router.visit(route('file.myFiles', file.path));
+    }
     return (
         <>
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -91,7 +96,8 @@ function MyFiles({ files }) {
                                 </thead>
                                 <tbody>
                                     { files.data.map((file, i) => (
-                                        <tr key={ i } className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <tr key={ i } onDoubleClick={ () => openFolder(file) }
+                                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                             <td className="w-4 p-4">
                                                 <div className="flex items-center">
                                                     <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
