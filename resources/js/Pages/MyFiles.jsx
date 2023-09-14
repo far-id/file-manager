@@ -62,54 +62,65 @@ function MyFiles({ files }) {
                         <input type="text" id="table-search" className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for items" />
                     </div>
                 </div>
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" className="p-4">
-                                <div className="flex items-center">
-                                    <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                    <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
-                                </div>
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Name
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Owner
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Last Modified
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                size
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { files.data.map((file, i) => (
-                            <tr key={ i } className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                <td className="w-4 p-4">
-                                    <div className="flex items-center">
-                                        <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                        <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
-                                    </div>
-                                </td>
-                                <th scope="row" className="flex items-center px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    { file.name }
-                                </th>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    { "owner" }
-                                </td>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    { file.updated_at }
-                                </td>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    { file.size }
-                                </td>
-                            </tr>
-                        )) }
-                    </tbody>
-                </table>
+                {
+                    files.data.length > 0
+                        ?
+                        (
+                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" className="p-4">
+                                            <div className="flex items-center">
+                                                <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
+                                            </div>
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Name
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Owner
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Last Modified
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            size
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { files.data.map((file, i) => (
+                                        <tr key={ i } className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <td className="w-4 p-4">
+                                                <div className="flex items-center">
+                                                    <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                    <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
+                                                </div>
+                                            </td>
+                                            <th scope="row" className="flex items-center px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { file.name }
+                                            </th>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { "owner" }
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { file.updated_at }
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { file.size }
+                                            </td>
+                                        </tr>
+                                    )) }
+                                </tbody>
+                            </table>
+                        )
+                        : (
+                            <div className='flex items-center justify-center text-lg'>
+                                <span className='px-4 py-2 bg-gray-900 rounded-full shadow'>Use "Create New" button.</span>
+                            </div>
+                        )
+                }
 
                 <nav className="flex items-center justify-between pt-4" aria-label="Table navigation">
                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
