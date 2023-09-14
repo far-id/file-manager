@@ -5,14 +5,15 @@ import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import Dropdown from '../Dropdown';
 
 export default function NewFolderModal() {
+    const { folder } = usePage().props;
     const [showNewFolderModal, setShowNewFolderModal] = useState(false);
     const { data, setData, post, processing, reset, errors, } = useForm({
         name: '',
-        // parent_id: null
+        parent_id: folder.id
     });
     const nameInput = useRef();
 
@@ -28,7 +29,7 @@ export default function NewFolderModal() {
 
     const createFolder = (e) => {
         e.preventDefault();
-
+        console.log(data)
         post(route('folder.create'), {
             preserveScroll: true,
             onSuccess: () => closeNewFolderModal(),
@@ -58,7 +59,7 @@ export default function NewFolderModal() {
                             ref={ nameInput }
                             value={ data.name }
                             onChange={ (e) => setData('name', e.target.value) }
-                            className="mt-1 block w-full"
+                            className="block w-full mt-1"
                             isFocused
                             placeholder="Folder Name"
                         />
@@ -66,7 +67,7 @@ export default function NewFolderModal() {
                         <InputError message={ errors.name } className="mt-2" />
                     </div>
 
-                    <div className="mt-6 flex justify-end">
+                    <div className="flex justify-end mt-6">
                         <SecondaryButton onClick={ closeNewFolderModal }>Cancel</SecondaryButton>
 
                         <PrimaryButton className="ml-3" disabled={ processing }>

@@ -14,15 +14,15 @@ class FileService
         if (!$parent) {
             $parent = $this->getRoot();
         }
-        $file = File::create([
-            'name' => $request->name,
-            'is_folder' => 1
-        ]);
+
+        $file = new File();
+        $file->is_folder = 1;
+        $file->name = $request->name;
 
         $parent->appendNode($file);
     }
 
-    protected function getRoot(): File
+    public function getRoot(): File
     {
         return File::query()
             ->whereIsRoot()

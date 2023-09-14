@@ -33,14 +33,14 @@ export default function AuthLayout({ children }) {
                     <div className="px-3 py-3 lg:px-5 lg:pl-3">
                         <div className="flex items-center justify-between">
                             <Link href={ route('file.myFiles') } className='flex items-center gap-x-2'>
-                                <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                                <span className='text-white font-sans font-medium tracking-wider text-xl'>File Manager</span>
+                                <ApplicationLogo className="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
+                                <span className='font-sans text-xl font-medium tracking-wider text-white'>File Manager</span>
                             </Link>
                             <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button"
                                 onClick={ () => setShowingNavigationDropdown((previousState) => !previousState) }
                                 className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                             >
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <svg className="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
                                         className='inline-flex'
                                         strokeLinecap="round"
@@ -60,7 +60,7 @@ export default function AuthLayout({ children }) {
                                 <Dropdown.Trigger>
                                     <button
                                         type="button"
-                                        className="inline-flex tracking-wider justify-center w-full items-center px-3 py-2 border border-gray-600 active:shadow-md text-md leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
+                                        className="inline-flex items-center justify-center w-full px-3 py-2 font-medium leading-4 tracking-wider text-gray-700 transition duration-150 ease-in-out bg-white border border-gray-600 rounded-md active:shadow-md text-md dark:text-gray-200 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                     >
                                         Create New
                                         <svg
@@ -125,16 +125,16 @@ export default function AuthLayout({ children }) {
                     </ul>
                 </div>
             </aside>
-            <div className="p-4 sm:ml-64 bg-white dark:bg-gray-800 text-white">
+            <div className="p-4 text-white bg-white sm:ml-64 dark:bg-gray-800">
                 <div className="flex justify-between">
-                    <div className='w-1/2 hidden sm:inline'>
+                    <div className='hidden w-1/2 sm:inline'>
                         { searchInputForm() }
                     </div>
                     <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button"
                         onClick={ () => setShowingNavigationDropdown((previousState) => !previousState) }
                         className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                     >
-                        <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path
                                 className='inline-flex'
                                 strokeLinecap="round"
@@ -144,9 +144,9 @@ export default function AuthLayout({ children }) {
                             />
                         </svg>
                     </button>
-                    <Link href={ route('file.myFiles') } className='flex sm:hidden items-center gap-x-2'>
-                        <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                        <span className='text-white font-sans font-medium tracking-wider text-xl'>File Manager</span>
+                    <Link href={ route('file.myFiles') } className='flex items-center sm:hidden gap-x-2'>
+                        <ApplicationLogo className="block w-auto text-gray-800 fill-current h-9 dark:text-gray-200" />
+                        <span className='font-sans text-xl font-medium tracking-wider text-white'>File Manager</span>
                     </Link>
                     <div className="flex items-center">
                         <div className="flex items-center ml-3">
@@ -155,7 +155,7 @@ export default function AuthLayout({ children }) {
                                     <span className="inline-flex rounded-md">
                                         <button
                                             type="button"
-                                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
+                                            className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                         >
                                             { user.name }
 
@@ -185,10 +185,10 @@ export default function AuthLayout({ children }) {
                         </div>
                     </div>
                 </div>
-                <div className='inline sm:hidden w-1/2'>
+                <div className='inline w-1/2 sm:hidden'>
                     { searchInputForm() }
                 </div>
-                <div className="px-4 pb-3 pt-6">
+                <div className="px-4 pt-6 pb-3">
                     { children }
                 </div>
             </div>
