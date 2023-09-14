@@ -19,7 +19,6 @@ class FileController extends Controller
             $folder = File::query()
                 ->where('path', $folder)
                 ->where('created_by', auth()->id())
-                ->where('is_folder', 1)
                 ->firstOrFail();
         } else {
             $folder = $this->fileService->getRoot();

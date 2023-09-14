@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
@@ -37,6 +37,11 @@ export default function NewFolderModal() {
             onFinish: () => reset(),
         });
     };
+
+    useEffect(() => {
+        setData('parent_id', folder.id);
+        console.log(folder);
+    }, [])
 
 
     return (

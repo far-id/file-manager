@@ -7,7 +7,8 @@ function MyFiles({ files }) {
         if (!file.is_folder) {
             return;
         }
-        router.visit(route('file.myFiles', file.path));
+        console.log(file.path);
+        router.visit(route('file.myFiles', { folder: file.path }));
     }
     return (
         <>
