@@ -1,9 +1,12 @@
+import FileUploadMenuItem from '@/Components/App/FileUploadMenuItem';
+import FolderUploadMenuItem from '@/Components/App/FolderUploadMenuItem';
 import NewFolderModal from '@/Components/App/NewFolderModal';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
+import { FILE_UPLOAD_STARTED, emitter } from '@/event-but';
 import { Link, usePage } from '@inertiajs/react';
-import React, { useState } from 'react';
-import { AiFillFolder } from 'react-icons/ai';
+import React, { useEffect, useRef, useState } from 'react';
+import { AiFillFolder, AiOutlineCloudUpload } from 'react-icons/ai';
 import { FaShareSquare, FaTrash } from 'react-icons/fa';
 import { FaShareNodes } from 'react-icons/fa6';
 
@@ -25,6 +28,44 @@ const searchInputForm = () => (
 export default function AuthLayout({ children }) {
     const { user } = usePage().props.auth;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [dragOver, setDragOver] = useState(false);
+    const dragRef = useRef(null);  // this ref used for handle flicker on upload icon
+
+    const fileUpload = (e) => {
+        e.preventDefault();
+        console.log(e);
+    };
+
+    const onDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target !== dragRef.current) {
+            setDragOver(true);
+        }
+    };
+    const onDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target === dragRef.current) {
+            setDragOver(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target === dragRef.current) {
+            setDragOver(false);
+        }
+        // if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        //     console.log(e.dataTransfer.files);
+        // }
+        console.log(e.dataTransfer.files);
+    };
+
+    useEffect(() => {
+        emitter.on(FILE_UPLOAD_STARTED, fileUpload);
+    }, []);
 
     return (
         <div>
@@ -84,8 +125,8 @@ export default function AuthLayout({ children }) {
                                     contentClasses='tracking-wide py-1 bg-white dark:bg-gray-700'
                                 >
                                     <NewFolderModal />
-                                    <Dropdown.Link href={ route('profile.edit') }>Upload Files</Dropdown.Link>
-                                    <Dropdown.Link href={ route('profile.edit') }>Upload Folder</Dropdown.Link>
+                                    <FileUploadMenuItem />
+                                    <FolderUploadMenuItem />
                                 </Dropdown.Content>
                             </Dropdown>
                         </li>
@@ -188,8 +229,22 @@ export default function AuthLayout({ children }) {
                 <div className='inline w-1/2 sm:hidden'>
                     { searchInputForm() }
                 </div>
-                <div className="px-4 pt-6 pb-3">
+
+                <div className="min-h-screen px-4 pt-6 pb-3"
+                    onDrop={ handleDrop }
+                    onDragOver={ onDragOver }
+                    onDragLeave={ onDragLeave }
+                    onDragEnter={ ondragover }
+                >
                     { children }
+                    { dragOver && (
+                        <div
+                            ref={ dragRef }
+                            className='absolute left-0 right-0 flex flex-col items-center justify-center text-lg bottom-5'>
+                            <AiOutlineCloudUpload className='text-blue-500 text-7xl animate-bounce' />
+                            <span className='px-4 py-2 mt-4 bg-blue-600 rounded-full'>Release the file to Upload It.</span>
+                        </div>
+                    ) }
                 </div>
             </div>
         </div>
