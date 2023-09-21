@@ -87,6 +87,7 @@ function MyFiles({ files, ancestors }) {
                                                 </div>
                                             </td>
                                             <th scope="row" className="flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <FileIcon file={ file } />
                                                 { file.name }
                                             </th>
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
