@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Services\FileService;
+use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
@@ -40,6 +42,15 @@ class FileController extends Controller
     public function storeFolder(StoreFolderRequest $request)
     {
         $this->fileService->storeFolder($request);
+
         return back();
     }
+
+    public function storeFile(StoreFileRequest $request)
+    {
+        $this->fileService->storeFile($request);
+
+        return back();
+    }
+
 }

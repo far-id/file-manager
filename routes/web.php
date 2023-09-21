@@ -36,7 +36,8 @@ Route::controller(FileController::class)
     Route::get('my-files/{folder?}', 'myFiles')
         ->where('folder', '(.*)')
         ->name('file.myFiles');
-    Route::post('folder/create', 'storeFolder')->name('folder.create');
+    Route::post('folder/store', 'storeFolder')->name('folder.store');
+    Route::post('file/store', 'storeFile')->name('file.store');
     Route::get('trash', 'trash')->name('file.trash');
     Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');
     Route::get('shared=by-me', 'sharedByMe')->name('file.SharedByMe');

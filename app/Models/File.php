@@ -13,7 +13,7 @@ class File extends Model
 {
     use HasFactory, NodeTrait, SoftDeletes;
 
-    protected $fillable = ['name', 'is_folder'];
+    protected $fillable = ['name', 'is_folder', 'storage_path'];
 
     public function user(): BelongsTo
     {

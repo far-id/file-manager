@@ -29,8 +29,7 @@ export default function NewFolderModal() {
 
     const createFolder = (e) => {
         e.preventDefault();
-        console.log(data)
-        post(route('folder.create'), {
+        post(route('folder.store'), {
             preserveScroll: true,
             onSuccess: () => closeNewFolderModal(),
             onError: () => nameInput.current.focus(),
@@ -40,7 +39,6 @@ export default function NewFolderModal() {
 
     useEffect(() => {
         setData('parent_id', folder.id);
-        console.log(folder);
     }, [])
 
 

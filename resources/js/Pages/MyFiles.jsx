@@ -1,3 +1,4 @@
+import FileIcon from '@/Components/App/FileIcon';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { Link, router } from '@inertiajs/react';
 import React from 'react';
@@ -85,7 +86,7 @@ function MyFiles({ files, ancestors }) {
                                                     <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
                                                 </div>
                                             </td>
-                                            <th scope="row" className="flex items-center px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <th scope="row" className="flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 { file.name }
                                             </th>
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -124,8 +125,8 @@ function MyFiles({ files, ancestors }) {
                         { files.meta.links.map((link, i) => (
                             <li key={ i }>
                                 <Link href={ link.url } dangerouslySetInnerHTML={ { __html: link.label } } disabled={ link.active || link.url === null && true } as='button'
-                                    className={ `flex items-center justify-center h-8 px-3 
-                                    ml-0 
+                                    className={ `flex items-center justify-center h-8 px-3
+                                    ml-0
                                     ${link.active
                                             ? 'text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white'
                                             : 'leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'}
@@ -142,4 +143,4 @@ function MyFiles({ files, ancestors }) {
 }
 
 MyFiles.layout = (page) => <AuthLayout children={ page } />;
-export default MyFiles; 
+export default MyFiles;

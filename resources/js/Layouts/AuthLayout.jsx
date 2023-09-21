@@ -4,7 +4,7 @@ import NewFolderModal from '@/Components/App/NewFolderModal';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import { FILE_UPLOAD_STARTED, emitter } from '@/event-but';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import { AiFillFolder, AiOutlineCloudUpload } from 'react-icons/ai';
 import { FaShareSquare, FaTrash } from 'react-icons/fa';
@@ -26,15 +26,16 @@ const searchInputForm = () => (
 );
 
 export default function AuthLayout({ children }) {
+    const { folder } = usePage().props
     const { user } = usePage().props.auth;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const dragRef = useRef(null);  // this ref used for handle flicker on upload icon
-
-    const fileUpload = (e) => {
-        e.preventDefault();
-        console.log(e);
-    };
+    const { data, setData, post } = useForm({
+        files: [],
+        relative_paths: [],
+        parent_id: folder.id
+    });
 
     const onDragOver = (e) => {
         e.preventDefault();
@@ -54,17 +55,34 @@ export default function AuthLayout({ children }) {
     const handleDrop = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (e.target === dragRef.current) {
-            setDragOver(false);
+        setDragOver(false);
+        const { files } = e.dataTransfer;
+        if (files && files[0]) {
+            fileUpload(files)
         }
-        // if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        //     console.log(e.dataTransfer.files);
-        // }
-        console.log(e.dataTransfer.files);
+    };
+
+    const fileUpload = (files) => {
+        setData('files', files);
     };
 
     useEffect(() => {
+        if (data.files.length > 0) {
+            setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
+        }
+    }, [data.files]);
+    // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event jadi dipisah dengan useeffect
+    useEffect(() => {
+        if (data.files.length > 0) {
+            post(route('file.store'));
+        }
+    }, [data.files, data.relative_paths])
+
+
+
+    useEffect(() => {
         emitter.on(FILE_UPLOAD_STARTED, fileUpload);
+        setData('parent_id', folder.id);
     }, []);
 
     return (
@@ -230,16 +248,16 @@ export default function AuthLayout({ children }) {
                     { searchInputForm() }
                 </div>
 
-                <div className="min-h-screen px-4 pt-6 pb-3"
+                <div className={ `min-h-screen px-4 pt-6 pb-3 ${dragOver && 'bg-blue-200'}` }
                     onDrop={ handleDrop }
                     onDragOver={ onDragOver }
                     onDragLeave={ onDragLeave }
                     onDragEnter={ ondragover }
+                    ref={ dragRef }
                 >
                     { children }
                     { dragOver && (
                         <div
-                            ref={ dragRef }
                             className='absolute left-0 right-0 flex flex-col items-center justify-center text-lg bottom-5'>
                             <AiOutlineCloudUpload className='text-blue-500 text-7xl animate-bounce' />
                             <span className='px-4 py-2 mt-4 bg-blue-600 rounded-full'>Release the file to Upload It.</span>

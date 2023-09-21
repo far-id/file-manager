@@ -20,12 +20,13 @@ class StoreFolderRequest extends ParentIdBaseRequest
                 Rule::unique(File::class, 'name')
                     ->where('created_by', auth()->id())
                     ->where('parent_id', $this->parent_id) // this parent_id is from ParentIdBaseRequest class
+                    ->where('is_folder', 1)
                     ->whereNull('deleted_at'),
             ]
         ]);
     }
 
-    public function message(): array
+    public function messages(): array
     {
         return [
             'name.unique' => 'Folder ":input" already exists'
