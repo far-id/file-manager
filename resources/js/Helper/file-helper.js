@@ -2,6 +2,18 @@ function isImage(file) {
     return /^image\/\w+$/.test(file.mime);
 }
 
+function isAudio(file) {
+    return /^audio\/\w+$/.test(file.mime);
+}
+
+function isVideo(file) {
+    return /^video\/\w+$/.test(file.mime);
+}
+
+function isText(file) {
+    return /^text\/\w+$/.test(file.mime);
+}   
+
 function isPDF(file) {
     return [
         'application/pdf',
@@ -10,25 +22,6 @@ function isPDF(file) {
         'application/vnd.pdf',
         'text/pdf',
         'text/x-pdf',
-    ].includes(file.mime);
-}
-
-function isAudio(file) {
-    return ['audio/mpeg',
-        'audio/ogg',
-        'audio/wav',
-        'audio/x-m4a',
-        'audio/webm',
-    ].includes(file.mime);
-}
-
-function isVideo(file) {
-    return [
-        'video/mp4',
-        'video/mpeg',
-        'video/ogg',
-        'video/quicktime',
-        'video/webm',
     ].includes(file.mime);
 }
 
@@ -50,19 +43,22 @@ function isExcel(file) {
     ].includes(file.mime);
 }
 
+
+function isPowerPoint(file) {
+    return [
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.ms-powerpoint',
+    ].includes(file.mime);
+
+}
+
 function isZip(file) {
     return [
         'application/zip',
-    ].includes(file.mime);
-}
-
-function isText(file) {
-    return [
-        'text/plain',
-        'text/html',
-        'text/css',
-        'text/javascript',
-        'text/csv',
+        'application/x-rar-compressed',
+        'application/x-zip-compressed',
+        'application/x-7z-compressed',
+        'application/x-gzip',
     ].includes(file.mime);
 }
 
@@ -75,4 +71,5 @@ export {
     isExcel,
     isZip,
     isText,
+    isPowerPoint,
 };

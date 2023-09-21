@@ -1,6 +1,6 @@
 import React from 'react';
 import { BsFolder2 } from 'react-icons/bs';
-import { isImage, isPDF, isAudio, isVideo, isWord, isExcel, isZip, isText, } from '@/Helper/file-helper';
+import { isImage, isPDF, isAudio, isVideo, isWord, isExcel, isZip, isText, isPowerPoint, } from '@/Helper/file-helper';
 
 export default function FileIcon({ file }) {
     const fileType = (file) => {
@@ -16,10 +16,12 @@ export default function FileIcon({ file }) {
             return 'word.png';
         } else if (isExcel(file)) {
             return 'sheets.png';
+        } else if (isPowerPoint(file)) {
+            return 'powerpoint.png';
         } else if (isZip(file)) {
             return 'zip.png';
         } else if (isText(file)) {
-            return 'txt.png';
+            return 'text.png';
         } else {
             return 'attach-file.png';
         }
