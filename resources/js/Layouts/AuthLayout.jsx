@@ -86,9 +86,9 @@ export default function AuthLayout({ children }) {
                         message = "Error during uploading file. Please try again leter.";
                     }
                     toast.error(message);
-                }
+                },
+                onFinish: () => reset('files', 'relative_paths'),
             });
-            reset('files', 'relative_paths');
         }
     }, [data.files, data.relative_paths])
 
@@ -287,9 +287,6 @@ export default function AuthLayout({ children }) {
                     position="top-right"
                     reverseOrder={ false }
                 />
-                <div className="bottom-10 right-4 fixed">
-                    <button onClick={ () => toast.error("hey") }>Click me</button>
-                </div>
             </div>
 
         </div>
