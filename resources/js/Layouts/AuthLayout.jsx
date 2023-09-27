@@ -77,8 +77,16 @@ export default function AuthLayout({ children }) {
     useEffect(() => {
         if (data.files.length > 0) {
             post(route('file.store'), {
-                onSuccess: (data) => console.log(data),
-                onError: (error) => toast.error(error[Object.keys(error)[0]])
+                onSuccess: toast.success('Uploaded'),
+                onError: (errors) => {
+                    let message;
+                    if (Object.keys(errors).length > 0) {
+                        message = errors[Object.keys(errors)[0]];
+                    } else {
+                        message = "Error during uploading file. Please try again leter.";
+                    }
+                    toast.error(message);
+                }
             });
             reset('files', 'relative_paths');
         }
