@@ -7,6 +7,7 @@ import Dropdown from '@/Components/Dropdown';
 import { FILE_UPLOAD_STARTED, emitter } from '@/event-but';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { AiFillFolder, AiOutlineCloudUpload } from 'react-icons/ai';
 import { FaShareSquare, FaTrash } from 'react-icons/fa';
 import { FaShareNodes } from 'react-icons/fa6';
@@ -32,7 +33,7 @@ export default function AuthLayout({ children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const dragRef = useRef(null);  // this ref used for handle flicker on upload icon
-    const { data, setData, post, progress } = useForm({
+    const { data, setData, post, progress, reset } = useForm({
         files: [],
         relative_paths: [],
         parent_id: folder.id
@@ -70,13 +71,16 @@ export default function AuthLayout({ children }) {
     useEffect(() => {
         if (data.files.length > 0) {
             setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
-            console.log(progress)
         }
     }, [data.files]);
     // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event jadi dipisah dengan useeffect
     useEffect(() => {
         if (data.files.length > 0) {
-            post(route('file.store'));
+            post(route('file.store'), {
+                onSuccess: (data) => console.log(data),
+                onError: (error) => toast.error(error[Object.keys(error)[0]])
+            });
+            reset('files', 'relative_paths');
         }
     }, [data.files, data.relative_paths])
 
@@ -268,9 +272,16 @@ export default function AuthLayout({ children }) {
                 { progress && (
 
                     <div className="bottom-10 right-4 fixed">
-                        <CricleProgress percentage={ 10 } />
+                        <CricleProgress percentage={ progress.percentage } />
                     </div>
                 ) }
+                <Toaster
+                    position="top-right"
+                    reverseOrder={ false }
+                />
+                <div className="bottom-10 right-4 fixed">
+                    <button onClick={ () => toast.error("hey") }>Click me</button>
+                </div>
             </div>
 
         </div>
