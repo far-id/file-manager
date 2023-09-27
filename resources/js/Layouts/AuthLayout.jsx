@@ -1,3 +1,4 @@
+import CricleProgress from '@/Components/App/CricleProgress';
 import FileUploadMenuItem from '@/Components/App/FileUploadMenuItem';
 import FolderUploadMenuItem from '@/Components/App/FolderUploadMenuItem';
 import NewFolderModal from '@/Components/App/NewFolderModal';
@@ -31,7 +32,7 @@ export default function AuthLayout({ children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [dragOver, setDragOver] = useState(false);
     const dragRef = useRef(null);  // this ref used for handle flicker on upload icon
-    const { data, setData, post } = useForm({
+    const { data, setData, post, progress } = useForm({
         files: [],
         relative_paths: [],
         parent_id: folder.id
@@ -69,6 +70,7 @@ export default function AuthLayout({ children }) {
     useEffect(() => {
         if (data.files.length > 0) {
             setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
+            console.log(progress)
         }
     }, [data.files]);
     // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event jadi dipisah dengan useeffect
@@ -77,7 +79,6 @@ export default function AuthLayout({ children }) {
             post(route('file.store'));
         }
     }, [data.files, data.relative_paths])
-
 
 
     useEffect(() => {
@@ -184,7 +185,7 @@ export default function AuthLayout({ children }) {
                     </ul>
                 </div>
             </aside>
-            <div className="p-4 text-white bg-white sm:ml-64 dark:bg-gray-800">
+            <div className="p-4 min-h-screen text-white bg-white sm:ml-64 dark:bg-gray-800">
                 <div className="flex justify-between">
                     <div className='hidden w-1/2 sm:inline'>
                         { searchInputForm() }
@@ -248,7 +249,7 @@ export default function AuthLayout({ children }) {
                     { searchInputForm() }
                 </div>
 
-                <div className={ `min-h-screen px-4 pt-6 pb-3 ${dragOver && 'bg-blue-200'}` }
+                <div className={ `min-h-max px-4 pt-6 pb-3 ${dragOver && 'bg-blue-200'}` }
                     onDrop={ handleDrop }
                     onDragOver={ onDragOver }
                     onDragLeave={ onDragLeave }
@@ -264,7 +265,14 @@ export default function AuthLayout({ children }) {
                         </div>
                     ) }
                 </div>
+                { progress && (
+
+                    <div className="bottom-10 right-4 fixed">
+                        <CricleProgress percentage={ 10 } />
+                    </div>
+                ) }
             </div>
+
         </div>
     );
 }
