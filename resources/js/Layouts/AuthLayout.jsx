@@ -77,7 +77,7 @@ export default function AuthLayout({ children }) {
     useEffect(() => {
         if (data.files.length > 0) {
             post(route('file.store'), {
-                onSuccess: toast.success('Uploaded'),
+                onSuccess: () => toast.success('Uploaded'),
                 onError: (errors) => {
                     let message;
                     if (Object.keys(errors).length > 0) {
