@@ -17,13 +17,6 @@ function MyFiles({ files, ancestors }) {
         router.visit(route('file.myFiles', { folder: file.path }));
     }
 
-    const reloadPage = () => {
-        httpGet(route('file.myFiles')).then(res => {
-            setAllFiles([...res.data]);
-            nextPage.current = res.links.next;
-        });
-    };
-
     useEffect(() => {
         const observer = new IntersectionObserver((entries) =>
             entries.forEach(entry => {
@@ -41,6 +34,13 @@ function MyFiles({ files, ancestors }) {
     }, []);
 
     useEffect(() => {
+        const reloadPage = () => {
+            httpGet(route('file.myFiles')).then(res => {
+                setAllFiles([...res.data]);
+                nextPage.current = res.links.next;
+            });
+        };
+
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
     }, [])
 
@@ -84,63 +84,59 @@ function MyFiles({ files, ancestors }) {
                         <input type="text" id="table-search" className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for items" /> */}
                     </div>
                 </div>
-                {
-                    allFiles.length > 0
-                        ?
-                        (
-                            <div className='overflow-auto block max-h-96 sm:max-h-[82vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
-                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                    <thead className="sticky top-0 w-full text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                        <tr>
-                                            <th scope="col" className="p-4">
+                <div className='overflow-auto block max-h-96 sm:max-h-[82vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
+                    { allFiles.length > 0
+                        ? (
+                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead className="sticky top-0 w-full text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" className="p-4">
+                                            <div className="flex items-center">
+                                                <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
+                                            </div>
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Name
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Owner
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            Last Modified
+                                        </th>
+                                        <th scope="col" className="px-6 py-3">
+                                            size
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { allFiles.map((file, i) => (
+                                        <tr key={ i } onDoubleClick={ () => openFolder(file) }
+                                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <td className="w-4 p-4">
                                                 <div className="flex items-center">
-                                                    <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                    <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
+                                                    <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                    <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
                                                 </div>
+                                            </td>
+                                            <th scope="row" className="flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <FileIcon file={ file } />
+                                                { file.name }
                                             </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                Name
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                Owner
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                Last Modified
-                                            </th>
-                                            <th scope="col" className="px-6 py-3">
-                                                size
-                                            </th>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { "owner" }
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { file.updated_at }
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                { file.size }
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        { allFiles.map((file, i) => (
-                                            <tr key={ i } onDoubleClick={ () => openFolder(file) }
-                                                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                                <td className="w-4 p-4">
-                                                    <div className="flex items-center">
-                                                        <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                        <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
-                                                    </div>
-                                                </td>
-                                                <th scope="row" className="flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    <FileIcon file={ file } />
-                                                    { file.name }
-                                                </th>
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    { "owner" }
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    { file.updated_at }
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    { file.size }
-                                                </td>
-                                            </tr>
-                                        )) }
-                                    </tbody>
-                                </table>
-                                <div ref={ loadMoreRef }></div>
-                            </div>
+                                    )) }
+                                </tbody>
+                            </table>
                         )
                         : (
                             <div className='flex items-center justify-center text-lg'>
@@ -148,6 +144,8 @@ function MyFiles({ files, ancestors }) {
                             </div>
                         )
                 }
+                    <div ref={ loadMoreRef }></div>
+                </div>
             </div>
 
         </>
