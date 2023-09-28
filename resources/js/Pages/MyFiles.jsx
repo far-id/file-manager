@@ -1,15 +1,49 @@
 import FileIcon from '@/Components/App/FileIcon';
+import { httpGet } from '@/Helper/http-helper';
 import AuthLayout from '@/Layouts/AuthLayout';
+import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 import { Link, router } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function MyFiles({ files, ancestors }) {
+    const [allFiles, setAllFiles] = useState([...files.data]);
+    const loadMoreRef = useRef();
+    const nextPage = useRef(files.links.next)
+
     const openFolder = (file) => {
         if (!file.is_folder) {
             return;
         }
         router.visit(route('file.myFiles', { folder: file.path }));
     }
+
+    const reloadPage = () => {
+        httpGet(route('file.myFiles')).then(res => {
+            setAllFiles([...res.data]);
+            nextPage.current = res.links.next;
+        });
+    };
+
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) =>
+            entries.forEach(entry => {
+                if (entry.isIntersecting && nextPage.current != null) {
+                    httpGet(nextPage.current).then(res => {
+                        setAllFiles(prevFiles => [...prevFiles, ...res.data]);
+                        nextPage.current = res.links.next;
+                    });
+                }
+            }),
+            { rootMargin: '-250px 0px 0px 0px', }
+        );
+
+        observer.observe(loadMoreRef.current);
+    }, []);
+
+    useEffect(() => {
+        emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
+    }, [])
+
 
     return (
         <>
@@ -51,10 +85,10 @@ function MyFiles({ files, ancestors }) {
                     </div>
                 </div>
                 {
-                    files.data.length > 0
+                    allFiles.length > 0
                         ?
                         (
-                            <div className='overflow-auto block max-h-96 sm:max-h-[70vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
+                            <div className='overflow-auto block max-h-96 sm:max-h-[82vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
                                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                     <thead className="sticky top-0 w-full text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
@@ -79,7 +113,7 @@ function MyFiles({ files, ancestors }) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        { files.data.map((file, i) => (
+                                        { allFiles.map((file, i) => (
                                             <tr key={ i } onDoubleClick={ () => openFolder(file) }
                                                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                                                 <td className="w-4 p-4">
@@ -105,6 +139,7 @@ function MyFiles({ files, ancestors }) {
                                         )) }
                                     </tbody>
                                 </table>
+                                <div ref={ loadMoreRef }></div>
                             </div>
                         )
                         : (
@@ -113,32 +148,6 @@ function MyFiles({ files, ancestors }) {
                             </div>
                         )
                 }
-                <nav className="flex items-center justify-between pt-4" aria-label="Table navigation">
-                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                        Showing&nbsp;
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                            { files.meta.from }-{ files.meta.to }
-                        </span>
-                        &nbsp;of&nbsp;
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                            { files.meta.total }
-                        </span>
-                    </span>
-                    <ul className="inline-flex h-8 -space-x-px text-sm">
-                        { files.meta.links.map((link, i) => (
-                            <li key={ i }>
-                                <Link href={ link.url } dangerouslySetInnerHTML={ { __html: link.label } } disabled={ link.active || link.url === null && true } as='button'
-                                    className={ `flex items-center justify-center h-8 px-3
-                                    ml-0
-                                    ${link.active
-                                            ? 'text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white'
-                                            : 'leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'}
-                                    ` } />
-                            </li>
-                        )) }
-                    </ul>
-                </nav>
-
             </div>
 
         </>

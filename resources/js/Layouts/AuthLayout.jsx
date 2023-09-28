@@ -4,7 +4,7 @@ import FolderUploadMenuItem from '@/Components/App/FolderUploadMenuItem';
 import NewFolderModal from '@/Components/App/NewFolderModal';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
-import { FILE_UPLOAD_STARTED, emitter } from '@/event-but';
+import { FILE_UPLOAD_STARTED, RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -73,11 +73,14 @@ export default function AuthLayout({ children }) {
             setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
         }
     }, [data.files]);
-    // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event jadi dipisah dengan useeffect
+    // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event, jadi dipisah dengan useeffect, harusnya bisa selesai hanya dengan function fileUpload
     useEffect(() => {
         if (data.files.length > 0) {
             post(route('file.store'), {
-                onSuccess: () => toast.success('Uploaded'),
+                onSuccess: () => {
+                    toast.success('Uploaded');
+                    emitter.emit(RELOAD_AFTER_UPLOAD);
+                },
                 onError: (errors) => {
                     let message;
                     if (Object.keys(errors).length > 0) {

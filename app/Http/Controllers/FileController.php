@@ -15,7 +15,7 @@ class FileController extends Controller
     {
     }
 
-    public function myFiles(string $folder = null)
+    public function myFiles(Request $request, string $folder = null)
     {
         if ($folder) {
             $folder = File::query()
@@ -31,9 +31,14 @@ class FileController extends Controller
             ->where('parent_id', $folder->id)
             ->orderBy('is_folder', 'desc')
             ->orderBy('created_at', 'desc')
-            ->paginate();
+        ->paginate(10);
 
         $files = FileResource::collection($files);
+
+        if ($request->wantsJson()) {
+            return $files;
+        }
+
         $ancestors = FileResource::collection([...$folder->ancestors, $folder]);
 
         return inertia('MyFiles', compact('folder', 'files', 'ancestors'));
