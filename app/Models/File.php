@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Kalnoy\Nestedset\NodeTrait;
 
 class File extends Model
@@ -70,6 +71,12 @@ class File extends Model
 
         static::updating(function ($model) {
             $model->updated_by = auth()->id();
+        });
+
+        static::forceDeleted(function ($model) {
+            if (!$model->is_folder) {
+                Storage::delete($model->storage_path);
+            }
         });
     }
 }

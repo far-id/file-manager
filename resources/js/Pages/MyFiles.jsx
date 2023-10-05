@@ -2,13 +2,36 @@ import FileIcon from '@/Components/App/FileIcon';
 import { httpGet } from '@/Helper/http-helper';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
+import { BsPersonPlusFill } from 'react-icons/bs';
+import { HiOutlineDownload } from 'react-icons/hi';
+import { IoMdClose, IoMdTrash } from 'react-icons/io';
+
+const IconButton = ({ children, className = '', ...props }) => (
+    <button
+        { ...props }
+        type='button'
+        className={
+            `inline-flex items-center px-2 py-2 bg-transparent rounded-full font-semibold text-md text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none active:ring-2 active:ring-indigo-500 active:ring-offset-2 dark:active:ring-offset-gray-800 transition ease-in-out duration-150`
+            + className
+        }
+    >
+        { children }
+    </button>
+)
 
 function MyFiles({ files, ancestors }) {
     const [allFiles, setAllFiles] = useState([...files.data]);
+    const [selected, setSelected] = useState({});
+
     const loadMoreRef = useRef();
-    const nextPage = useRef(files.links.next)
+    const nextPage = useRef(files.links.next);
+    const { data, setData, delete: destroy, reset } = useForm({
+        all: false,
+        ids: [],
+        parent_id: usePage().props.folder.id,
+    })
 
     const openFolder = (file) => {
         if (!file.is_folder) {
@@ -16,6 +39,57 @@ function MyFiles({ files, ancestors }) {
         }
         router.visit(route('file.myFiles', { folder: file.path }));
     }
+
+    const onSelectedAllChange = () => {
+        allFiles.map(file => selected[file.id] = !data.all);
+        setData('all', !data.all);
+        setIdsWhenSelectedChange();
+    };
+
+    const setIdsWhenSelectedChange = () => {
+        setData(data => ({
+            ...data,
+            ids: Object.entries(selected).filter(selected => selected[1]).map(selected => selected[0])
+        }));
+    };
+
+    const onSelectFile = (file) => {
+        setSelected({ ...selected, [file.id]: !selected[file.id] });
+    };
+
+    const cancelSelect = () => {
+        reset();
+        setSelected({});
+    };
+
+    const deleteSelectedFile = () => {
+        destroy(route('file.destroy'), {
+            onFinish: () => {
+                reset();
+                reloadPage();
+                setSelected({});
+            }
+        });
+    };
+
+    useEffect(() => {
+        let checked = true;
+        for (const f of allFiles) {
+            if (!selected[f.id]) {
+                checked = false;
+                break;
+            }
+        }
+        setData('all', checked);
+        setIdsWhenSelectedChange();
+    }, [selected]);
+
+    const reloadPage = () => {
+        httpGet(window.location.href).then(res => {
+            setAllFiles([...res.data]);
+            nextPage.current = res.links.next;
+        });
+    };
 
     useEffect(() => {
         const observer = new IntersectionObserver((entries) =>
@@ -30,20 +104,10 @@ function MyFiles({ files, ancestors }) {
             { rootMargin: '-250px 0px 0px 0px', }
         );
 
+        allFiles.map(file => selected[file.id] = data.all);
         observer.observe(loadMoreRef.current);
-    }, []);
-
-    useEffect(() => {
-        const reloadPage = () => {
-            httpGet(route('file.myFiles')).then(res => {
-                setAllFiles([...res.data]);
-                nextPage.current = res.links.next;
-            });
-        };
-
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
-    }, [])
-
+    }, []);
 
     return (
         <>
@@ -76,13 +140,25 @@ function MyFiles({ files, ancestors }) {
                             )) }
                         </ol>
                     </nav>
-                    <label htmlFor="table-search" className="sr-only">Search</label>
-                    <div className="relative">
-                        {/* <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" /></svg>
+                    { data.ids.length > 0 && (
+                        <div className="relative">
+                            <div className="flex items-center px-2 rounded-full bg-gray-700/60 gap-x-1">
+                                <IconButton onClick={ cancelSelect }>
+                                    <IoMdClose />
+                                </IconButton>
+                                <span className='text-xs'>{ data.ids.length } dipilih</span>
+                                <IconButton>
+                                    <BsPersonPlusFill />
+                                </IconButton>
+                                <IconButton onClick={ deleteSelectedFile }>
+                                    <IoMdTrash />
+                                </IconButton>
+                                <IconButton>
+                                    <HiOutlineDownload />
+                                </IconButton>
+                            </div>
                         </div>
-                        <input type="text" id="table-search" className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for items" /> */}
-                    </div>
+                    ) }
                 </div>
                 <div className='overflow-auto block max-h-96 sm:max-h-[82vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
                     { allFiles.length > 0
@@ -92,11 +168,17 @@ function MyFiles({ files, ancestors }) {
                                     <tr>
                                         <th scope="col" className="p-4">
                                             <div className="flex items-center">
-                                                <input id="checkbox-all-search" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                <input
+                                                    type="checkbox"
+                                                    checked={ data.all }
+                                                    onChange={ onSelectedAllChange }
+                                                    value={ data.all }
+                                                    id="checkbox-all-search"
+                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                 <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
                                             </div>
                                         </th>
-                                        <th scope="col" className="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3 pl-0">
                                             Name
                                         </th>
                                         <th scope="col" className="px-6 py-3">
@@ -112,15 +194,22 @@ function MyFiles({ files, ancestors }) {
                                 </thead>
                                 <tbody>
                                     { allFiles.map((file, i) => (
-                                        <tr key={ i } onDoubleClick={ () => openFolder(file) }
-                                            className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                        <tr key={ i } onClick={ () => onSelectFile(file) } onDoubleClick={ () => openFolder(file) }
+                                            className={ `border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
+                                            ${selected[file.id] || data.all ? 'bg-blue-300 dark:bg-blue-900' : 'bg-white dark:bg-gray-800'}` }>
                                             <td className="w-4 p-4">
                                                 <div className="flex items-center">
-                                                    <input id="checkbox-table-search-1" type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                    <span className='text-xl'>{ selected[file.id] }</span>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={ selected[file.id] || data.all }
+                                                        onChange={ () => onSelectFile(file) }
+                                                        id="checkbox-table-search-1"
+                                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                     <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
                                                 </div>
                                             </td>
-                                            <th scope="row" className="flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <th scope="row" className="flex items-center gap-2 px-6 py-4 pl-0 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 <FileIcon file={ file } />
                                                 { file.name }
                                             </th>

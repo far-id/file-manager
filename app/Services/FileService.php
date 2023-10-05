@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\DestroyFileRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Models\File;
@@ -50,6 +51,23 @@ class FileService
             foreach ($data['files'] as $file) {
                 /** @var UploadedFile $file*/
                 $this->saveFile($file, $parent, $user);
+            }
+        }
+    }
+
+    public function destroy(DestroyFileRequest $request)
+    {
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        if ($data['all']) {
+            foreach ($parent->children as $child) {
+                $child->delete();
+            }
+        } else {
+            foreach ($data['ids'] as $id) {
+                $file = File::findOrFail($id);
+                $file->delete();
             }
         }
     }

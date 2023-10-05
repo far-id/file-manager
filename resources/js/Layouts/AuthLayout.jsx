@@ -66,6 +66,7 @@ export default function AuthLayout({ children }) {
 
     const fileUpload = (files) => {
         setData('files', files);
+        // cooment: karena sifat useState yg asynchronous, maka function file upload dipisah menjadi beberapa useeffect
     };
 
     useEffect(() => {
@@ -73,7 +74,7 @@ export default function AuthLayout({ children }) {
             setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
         }
     }, [data.files]);
-    // cooment: gw ga tau pasti kenapa tapi ga bisa update data di satu event, jadi dipisah dengan useeffect, harusnya bisa selesai hanya dengan function fileUpload
+
     useEffect(() => {
         if (data.files.length > 0) {
             post(route('file.store'), {
@@ -200,7 +201,7 @@ export default function AuthLayout({ children }) {
                     </ul>
                 </div>
             </aside>
-            <div className="p-4 min-h-screen text-white bg-white sm:ml-64 dark:bg-gray-800">
+            <div className="min-h-screen p-4 text-white bg-white sm:ml-64 dark:bg-gray-800">
                 <div className="flex justify-between">
                     <div className='hidden w-1/2 sm:inline'>
                         { searchInputForm() }
@@ -282,7 +283,7 @@ export default function AuthLayout({ children }) {
                 </div>
                 { progress && (
 
-                    <div className="bottom-10 right-4 fixed">
+                    <div className="fixed bottom-10 right-4">
                         <CricleProgress percentage={ progress.percentage } />
                     </div>
                 ) }
