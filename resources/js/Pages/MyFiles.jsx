@@ -99,7 +99,7 @@ function MyFiles({ files, ancestors }) {
                 params.append('ids[]', id);
             }
         };
-        console.log(data, params.toString());
+
         httpGet(route('file.download') + '?' + params.toString())
             .then(res => {
                 if (!res.url) return;

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Requests\FileActionRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Models\DownloadedFile;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -102,6 +103,11 @@ class FileService
                     $destination = 'public/' . pathinfo($file->storage_path, PATHINFO_BASENAME);
                     Storage::copy($file->storage_path, $destination);
 
+                    DownloadedFile::create([
+                        'storage_path' => $destination,
+                        'created_by' => auth()->id()
+                    ]);
+
                     $url = asset(Storage::url($destination));
                     $filename = $file->name;
                 }
@@ -111,6 +117,7 @@ class FileService
                 $filename = $parent->name . '.zip';
             }
         }
+
         return [
             'url' => $url,
             'filename' => $filename
@@ -160,6 +167,11 @@ class FileService
         }
 
         $zip->close();
+
+        DownloadedFile::create([
+            'storage_path' => $publicPath,
+            'created_by' => auth()->id()
+        ]);
 
         return asset(Storage::url($zipPath));
     }
