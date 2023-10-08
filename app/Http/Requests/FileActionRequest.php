@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Validation\Rule;
 
-class DestroyFileRequest extends ParentIdBaseRequest
+class FileActionRequest extends ParentIdBaseRequest
 {
     /**
      * Get the validation rules that apply to the request.

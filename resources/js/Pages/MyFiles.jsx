@@ -8,20 +8,30 @@ import { BsPersonPlusFill } from 'react-icons/bs';
 import { HiOutlineDownload } from 'react-icons/hi';
 import { IoMdClose, IoMdTrash } from 'react-icons/io';
 
-const IconButton = ({ children, className = '', ...props }) => (
-    <button
-        { ...props }
-        type='button'
-        className={
-            `inline-flex items-center px-2 py-2 bg-transparent rounded-full font-semibold text-md text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none active:ring-2 active:ring-indigo-500 active:ring-offset-2 dark:active:ring-offset-gray-800 transition ease-in-out duration-150`
-            + className
-        }
-    >
-        { children }
-    </button>
-)
+const IconButton = ({ children, title = '', className = '', ...props }) => {
+    const [popOver, setPopOver] = useState(false);
+    return (
+        <div className='flex items-center justify-center' onMouseEnter={ () => setPopOver(true) } onMouseLeave={ () => setPopOver(false) }>
+            <button
+                { ...props }
+                type='button'
+                className={
+                    `px-2 py-2 bg-transparent rounded-full shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none active:ring-2 active:ring-indigo-500 active:ring-offset-2 dark:active:ring-offset-gray-800 transition ease-in-out duration-150 inline-flex items-center font-semibold text-md text-gray-700 dark:text-gray-300 `
+                    + className
+                }
+            >
+                { children }
+            </button>
+
+            <div className={ `transition-all ease-in-out absolute mt-[3.25rem] z-10 ${popOver ? 'delay-71r00 visible' : 'invisible'}` }>
+                <span className='w-full rounded-md p-1 bg-slate-900 text-xs text-gray-100 font-thin tracking-tight'>{ title }</span>
+            </div>
+        </div >
+    );
+}
 
 function MyFiles({ files, ancestors }) {
+    const { folder } = usePage().props
     const [allFiles, setAllFiles] = useState([...files.data]);
     const [selected, setSelected] = useState({});
 
@@ -30,7 +40,7 @@ function MyFiles({ files, ancestors }) {
     const { data, setData, delete: destroy, reset } = useForm({
         all: false,
         ids: [],
-        parent_id: usePage().props.folder.id,
+        parent_id: folder.id,
     })
 
     const openFolder = (file) => {
@@ -71,6 +81,35 @@ function MyFiles({ files, ancestors }) {
             }
         });
     };
+
+    const downloadSelectedFile = () => {
+        if (!data.all && data.ids.length === 0) {
+            retrun;
+        }
+
+        const params = new URLSearchParams();
+        if (folder?.id) {
+            params.append('parent_id', folder?.id);
+        }
+
+        if (data.all) {
+            params.append('all', data.all ? 1 : 0);
+        } else {
+            for (const id of data.ids) {
+                params.append('ids[]', id);
+            }
+        };
+        console.log(data, params.toString());
+        httpGet(route('file.download') + '?' + params.toString())
+            .then(res => {
+                if (!res.url) return;
+
+                const a = document.createElement('a');
+                a.download = res.filename;
+                a.href = res.url;
+                a.click();
+            });
+    }
 
     useEffect(() => {
         let checked = true;
@@ -140,25 +179,23 @@ function MyFiles({ files, ancestors }) {
                             )) }
                         </ol>
                     </nav>
-                    { data.ids.length > 0 && (
-                        <div className="relative">
+                    <div className={ `relative ${data.ids.length < 1 && 'invisible'}` }>
                             <div className="flex items-center px-2 rounded-full bg-gray-700/60 gap-x-1">
-                                <IconButton onClick={ cancelSelect }>
+                            <IconButton onClick={ cancelSelect } title={ 'Unselect' }>
                                     <IoMdClose />
                                 </IconButton>
-                                <span className='text-xs'>{ data.ids.length } dipilih</span>
-                                <IconButton>
+                            <span className='text-xs'>{ data.ids.length } selected</span>
+                            <IconButton title={ 'Share' }>
                                     <BsPersonPlusFill />
                                 </IconButton>
-                                <IconButton onClick={ deleteSelectedFile }>
+                            <IconButton onClick={ deleteSelectedFile } title={ 'Move to trash' }>
                                     <IoMdTrash />
                                 </IconButton>
-                                <IconButton>
+                            <IconButton onClick={ downloadSelectedFile } title={ 'Download' }>
                                     <HiOutlineDownload />
                                 </IconButton>
                             </div>
-                        </div>
-                    ) }
+                    </div>
                 </div>
                 <div className='overflow-auto block max-h-96 sm:max-h-[82vh] scrollbar scrollbar-thumb-blue-900 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-w-2'>
                     { allFiles.length > 0

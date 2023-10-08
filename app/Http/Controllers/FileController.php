@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DestroyFileRequest;
+use App\Http\Requests\FileActionRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Resources\FileResource;
@@ -59,9 +59,15 @@ class FileController extends Controller
         return back();
     }
 
-    public function destroy(DestroyFileRequest $request)
+    public function destroy(FileActionRequest $request)
     {
         $this->fileService->destroy($request);
+
         return back();
+    }
+
+    public function download(FileActionRequest $request): array
+    {
+        return $this->fileService->download($request);
     }
 }

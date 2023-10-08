@@ -39,6 +39,7 @@ Route::controller(FileController::class)
     Route::post('folder', 'storeFolder')->name('folder.store');
     Route::post('file', 'storeFile')->name('file.store');
     Route::delete('file', 'destroy')->name('file.destroy');
+    Route::get('file/download', 'download')->name('file.download');
     Route::get('trash', 'trash')->name('file.trash');
     Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');
     Route::get('shared=by-me', 'sharedByMe')->name('file.SharedByMe');
