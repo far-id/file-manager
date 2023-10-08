@@ -7,6 +7,7 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import { useForm, usePage } from '@inertiajs/react';
 import Dropdown from '../Dropdown';
+import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 
 export default function NewFolderModal() {
     const { folder } = usePage().props;
@@ -31,7 +32,10 @@ export default function NewFolderModal() {
         e.preventDefault();
         post(route('folder.store'), {
             preserveScroll: true,
-            onSuccess: () => closeNewFolderModal(),
+            onSuccess: () => {
+                closeNewFolderModal();
+                emitter.emit(RELOAD_AFTER_UPLOAD);
+            },
             onError: () => nameInput.current.focus(),
             onFinish: () => reset(),
         });
