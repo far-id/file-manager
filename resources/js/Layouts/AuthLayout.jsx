@@ -38,6 +38,11 @@ export default function AuthLayout({ children }) {
         relative_paths: [],
         parent_id: folder.id
     });
+    const [dat, setdat] = useState({
+        files: [],
+        relative_paths: [],
+        perent_id: folder.id
+    })
 
     const onDragOver = (e) => {
         e.preventDefault();
@@ -65,15 +70,12 @@ export default function AuthLayout({ children }) {
     };
 
     const fileUpload = (files) => {
-        setData('files', files);
-        // cooment: karena sifat useState yg asynchronous, maka function file upload dipisah menjadi beberapa useeffect
+        setData(() => ({
+            'files': files,
+            'relative_paths': [...files].map(file => file.webkitRelativePath),
+        }));
+        // cooment: karena sifat useState yg asynchronous, maka function file upload dipisah ke useeffect
     };
-
-    useEffect(() => {
-        if (data.files.length > 0) {
-            setData('relative_paths', [...data.files].map(file => file.webkitRelativePath));
-        }
-    }, [data.files]);
 
     useEffect(() => {
         if (data.files.length > 0) {
@@ -94,7 +96,7 @@ export default function AuthLayout({ children }) {
                 onFinish: () => reset('files', 'relative_paths'),
             });
         }
-    }, [data.files, data.relative_paths])
+    }, [data])
 
 
     useEffect(() => {

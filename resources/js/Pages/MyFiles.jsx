@@ -64,7 +64,7 @@ function MyFiles({ files, ancestors }) {
     };
 
     const onSelectFile = (file) => {
-        setSelected({ ...selected, [file.id]: !selected[file.id] });
+        setSelected((prev) => ({ ...prev, [file.id]: !selected[file.id] }));
     };
 
     const cancelSelect = () => {
