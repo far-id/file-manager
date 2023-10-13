@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FileActionRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
+use App\Http\Requests\TrashFileRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
 use App\Services\FileService;
@@ -69,5 +70,38 @@ class FileController extends Controller
     public function download(FileActionRequest $request): array
     {
         return $this->fileService->download($request);
+    }
+
+    public function trash(Request $request)
+    {
+        $files = File::onlyTrashed()
+            ->where('created_by', auth()->id())
+            ->orderBy('is_folder', 'desc')
+            ->orderBy('deleted_at', 'desc')
+            ->orderBy('files.id', 'desc')
+            ->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        if ($request->wantsJson()) {
+            return $files;
+        }
+
+        return inertia('Trash', compact('files'));
+    }
+
+    public function deleteForever(TrashFileRequest $request)
+    {
+        $data = $request->validated();
+
+        if ($data['all']) {
+            $files = File::onlyTrashed()->get();
+        } else {
+            $files = File::onlyTrashed()->whereIn('id', $data['ids'] ?? [])->get();
+        }
+
+        $this->fileService->deleteForever($files);
+
+        return back();
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 use Kalnoy\Nestedset\NodeTrait;
 
 class File extends Model
@@ -23,7 +22,7 @@ class File extends Model
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(File::class, 'parent_id');
+        return $this->belongsTo(File::class, 'parent_id')->withTrashed();
     }
 
     public function isOwnedBy(int $userId): bool
@@ -52,31 +51,5 @@ class File extends Model
         $power = $this->size > 0 ? floor(log($this->size, 1024)) : 0;
 
         return number_format($this->size / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->created_by = auth()->id();
-            $model->updated_by = auth()->id();
-
-            if (!$model->parent) {
-                return;
-            }
-
-            $model->path = (!$model->parent->isRoot() ? $model->parent->path . '/' : '') . str()->slug($model->name);
-        });
-
-        static::updating(function ($model) {
-            $model->updated_by = auth()->id();
-        });
-
-        static::forceDeleted(function ($model) {
-            if (!$model->is_folder) {
-                Storage::delete($model->storage_path);
-            }
-        });
     }
 }

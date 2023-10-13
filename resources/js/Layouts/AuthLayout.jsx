@@ -36,13 +36,8 @@ export default function AuthLayout({ children }) {
     const { data, setData, post, progress, reset } = useForm({
         files: [],
         relative_paths: [],
-        parent_id: folder.id
+        parent_id: folder?.id
     });
-    const [dat, setdat] = useState({
-        files: [],
-        relative_paths: [],
-        perent_id: folder.id
-    })
 
     const onDragOver = (e) => {
         e.preventDefault();
@@ -101,7 +96,7 @@ export default function AuthLayout({ children }) {
 
     useEffect(() => {
         emitter.on(FILE_UPLOAD_STARTED, fileUpload);
-        setData('parent_id', folder.id);
+        setData('parent_id', folder?.id);
     }, []);
 
     return (

@@ -8,11 +8,12 @@ use App\Http\Requests\StoreFolderRequest;
 use App\Models\DownloadedFile;
 use App\Models\File;
 use App\Models\User;
+use App\Services\Interface\FileServiceInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
-class FileService
+class FileService implements FileServiceInterface
 {
     public function getRoot(): File
     {
@@ -22,7 +23,7 @@ class FileService
             ->firstOrFail();
     }
 
-    public function storeFolder(StoreFolderRequest $request)
+    public function storeFolder(StoreFolderRequest $request): void
     {
         $parent = $request->parent;
 
@@ -37,7 +38,7 @@ class FileService
         $parent->appendNode($file);
     }
 
-    public function storeFile(StoreFileRequest $request)
+    public function storeFile(StoreFileRequest $request): void
     {
         $data = $request->validated();
         $parent = $request->parent;
@@ -58,24 +59,24 @@ class FileService
         }
     }
 
-    public function destroy(FileActionRequest $request)
+    public function destroy(FileActionRequest $request): void
     {
         $data = $request->validated();
         $parent = $request->parent;
 
         if ($data['all']) {
             foreach ($parent->children as $child) {
-                $child->delete();
+                $this->moveToTrash($child);
             }
         } else {
             foreach ($data['ids'] as $id) {
                 $file = File::findOrFail($id);
-                $file->delete();
+                $this->moveToTrash($file);
             }
         }
     }
 
-    public function download(FileActionRequest $request)
+    public function download(FileActionRequest $request): array
     {
         $data = $request->validated();
         $parent = $request->parent;
@@ -123,6 +124,15 @@ class FileService
             'filename' => $filename
         ];
     }
+
+    public function deleteForever($files): void
+    {
+        foreach ($files as $file) {
+            $this->deleteFileFromStorage([$file]);
+            $file->forceDelete();
+        }
+    }
+
     private function saveFileTree($fileTree, $parent, User $user): void
     {
         foreach ($fileTree as $name => $file) {
@@ -183,6 +193,24 @@ class FileService
                 $this->addFilesToZip($zip, $file->children, $ancestors . $file->name . '/');
             } else {
                 $zip->addFile(Storage::path($file->storage_path), $ancestors . $file->name);
+            }
+        }
+    }
+
+    private function moveToTrash(File $file): bool
+    {
+        $file->deleted_at = now();
+
+        return $file->save();
+    }
+
+    private function deleteFileFromStorage($files): void
+    {
+        foreach ($files as $file) {
+            if ($file->is_folder) {
+                $this->deleteFileFromStorage($file->children);
+            } else {
+                Storage::delete($file->storage_path);
             }
         }
     }
