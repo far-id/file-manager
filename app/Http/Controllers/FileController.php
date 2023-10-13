@@ -20,7 +20,7 @@ class FileController extends Controller
     public function myFiles(Request $request, string $folder = null)
     {
         if ($folder) {
-            $folder = File::query()
+            $folder = File::with('star')
                 ->where('path', $folder)
                 ->where('created_by', auth()->id())
                 ->firstOrFail();
@@ -116,6 +116,13 @@ class FileController extends Controller
         }
 
         $this->fileService->restore($files);
+
+        return back();
+    }
+
+    public function favorite(FileActionRequest $request)
+    {
+        $this->fileService->favorite($request->id);
 
         return back();
     }

@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class StartedFile extends Model
+class StarredFile extends Model
 {
     use HasFactory;
 
@@ -13,4 +14,9 @@ class StartedFile extends Model
         'file_id',
         'user_id'
     ];
+
+    public function file(): BelongsTo
+    {
+        return $this->belongsTo(File::class);
+    }
 }

@@ -5,8 +5,9 @@ import AuthLayout from '@/Layouts/AuthLayout';
 import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { BsPersonPlusFill } from 'react-icons/bs';
-import { HiOutlineDownload } from 'react-icons/hi';
+import { HiOutlineDownload, HiOutlineStar, HiStar } from 'react-icons/hi';
 import { IoMdClose, IoMdTrash } from 'react-icons/io';
 
 function MyFiles({ files, ancestors }) {
@@ -16,7 +17,7 @@ function MyFiles({ files, ancestors }) {
 
     const loadMoreRef = useRef();
     const nextPage = useRef(files.links.next);
-    const { data, setData, delete: destroy, reset } = useForm({
+    const { data, setData, delete: destroy, post, reset } = useForm({
         all: false,
         ids: [],
         parent_id: folder.id,
@@ -52,6 +53,10 @@ function MyFiles({ files, ancestors }) {
     };
 
     const deleteSelectedFile = () => {
+        if (!data.all && data.ids.length === 0) {
+            retrun;
+        }
+
         destroy(route('file.destroy'), {
             onFinish: () => {
                 reset();
@@ -90,6 +95,23 @@ function MyFiles({ files, ancestors }) {
             });
     }
 
+    const favoriteSelectedFile = (fileId, successMessage) => {
+        router.visit(route('file.favorite'), {
+            method: 'post',
+            data: {
+                id: fileId,
+            },
+            onSuccess: () => {
+                toast.success(successMessage);
+            },
+            onFinish: () => {
+                reset();
+                reloadPage();
+                setSelected({});
+            }
+        });
+    };
+
     useEffect(() => {
         let checked = true;
         for (const f of allFiles) {
@@ -125,6 +147,7 @@ function MyFiles({ files, ancestors }) {
         allFiles.map(file => selected[file.id] = data.all);
         observer.observe(loadMoreRef.current);
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
+        console.log(allFiles)
     }, []);
 
     return (
@@ -165,14 +188,14 @@ function MyFiles({ files, ancestors }) {
                                 </IconButton>
                             <span className='text-xs'>{ data.ids.length } selected</span>
                             <IconButton title={ 'Share' }>
-                                    <BsPersonPlusFill />
-                                </IconButton>
+                                <BsPersonPlusFill />
+                            </IconButton>
                             <IconButton onClick={ deleteSelectedFile } title={ 'Move to trash' }>
-                                    <IoMdTrash />
-                                </IconButton>
+                                <IoMdTrash />
+                            </IconButton>
                             <IconButton onClick={ downloadSelectedFile } title={ 'Download' }>
-                                    <HiOutlineDownload />
-                                </IconButton>
+                                <HiOutlineDownload />
+                            </IconButton>
                             </div>
                     </div>
                 </div>
@@ -206,12 +229,14 @@ function MyFiles({ files, ancestors }) {
                                         <th scope="col" className="px-6 py-3">
                                             size
                                         </th>
+                                        <th scope="col" className="px-6 py-3">
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     { allFiles.map((file, i) => (
                                         <tr key={ i } onClick={ () => onSelectFile(file) } onDoubleClick={ () => openFolder(file) }
-                                            className={ `border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600
+                                            className={ `border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 group
                                             ${selected[file.id] || data.all ? 'bg-blue-300 dark:bg-blue-900' : 'bg-white dark:bg-gray-800'}` }>
                                             <td className="w-4 p-4">
                                                 <div className="flex items-center">
@@ -228,15 +253,31 @@ function MyFiles({ files, ancestors }) {
                                             <th scope="row" className="flex items-center gap-2 px-6 py-4 pl-0 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 <FileIcon file={ file } />
                                                 { file.name }
+                                                { file.is_favorite && (
+                                                    <HiStar />
+                                                ) }
                                             </th>
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                { "owner" }
+                                                { file.owner }
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 { file.updated_at }
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                { file.size }
+                                                { file.size === '0.00 B' ? (<div className='w-5 border-t border-b border-gray-200'></div>) : file.size }
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                <div className='invisible group-hover:visible'>
+                                                    { file.is_favorite ? (
+                                                        <IconButton onClick={ () => favoriteSelectedFile(file.id, 'Removed from favorites') } title={ 'Remove from favorites' }>
+                                                            <HiStar />
+                                                        </IconButton>
+                                                    ) : (
+                                                        <IconButton onClick={ () => favoriteSelectedFile(file.id, 'Added to favorites') } title={ 'Add to favorites' }>
+                                                            <HiOutlineStar />
+                                                        </IconButton>
+                                                    ) }
+                                                </div>
                                             </td>
                                         </tr>
                                     )) }

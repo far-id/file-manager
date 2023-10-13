@@ -7,6 +7,7 @@ use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Models\DownloadedFile;
 use App\Models\File;
+use App\Models\StarredFile;
 use App\Models\User;
 use App\Services\Interface\FileServiceInterface;
 use Illuminate\Http\UploadedFile;
@@ -137,6 +138,19 @@ class FileService implements FileServiceInterface
     {
         foreach ($files as $file) {
             $file->restore();
+        }
+    }
+
+    public function favorite(int $id): void
+    {
+        $starredFile = StarredFile::where('file_id', $id)->where('user_id', auth()->id());
+        if ($starredFile->exists()) {
+            $starredFile->delete();
+        } else {
+            StarredFile::create([
+                'file_id' => $id,
+                'user_id' => auth()->id()
+            ]);
         }
     }
 

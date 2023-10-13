@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('started_files', function (Blueprint $table) {
+        Schema::create('starred_files', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(File::class);
             $table->foreignIdFor(User::class);
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('started_files');
+        Schema::dropIfExists('starred_files');
     }
 };

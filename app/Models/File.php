@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kalnoy\Nestedset\NodeTrait;
 
@@ -23,6 +24,12 @@ class File extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(File::class, 'parent_id')->withTrashed();
+    }
+
+    public function starred(): HasOne
+    {
+        return $this->hasOne(StarredFile::class)
+            ->where('user_id', auth()->id());
     }
 
     public function isOwnedBy(int $userId): bool

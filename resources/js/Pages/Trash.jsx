@@ -190,9 +190,6 @@ function Trash({ files }) {
                                         Name
                                     </th>
                                     <th scope="col" className="px-6 py-3">
-                                        Owner
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
                                         Trashed Date
                                     </th>
                                     <th scope="col" className="px-6 py-3">
@@ -225,13 +222,10 @@ function Trash({ files }) {
                                             { file.name }
                                         </th>
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            { "owner" }
-                                        </td>
-                                        <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             { file.deleted_at }
                                         </td>
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            { file.size }
+                                            { file.size === '0.00 B' ? (<div className='w-5 border-t border-b border-gray-200'></div>) : file.size }
                                         </td>
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             { originalLocation(file.path) }
