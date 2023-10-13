@@ -133,6 +133,13 @@ class FileService implements FileServiceInterface
         }
     }
 
+    public function restore($files): void
+    {
+        foreach ($files as $file) {
+            $file->restore();
+        }
+    }
+
     private function saveFileTree($fileTree, $parent, User $user): void
     {
         foreach ($fileTree as $name => $file) {

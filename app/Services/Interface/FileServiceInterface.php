@@ -15,4 +15,5 @@ interface FileServiceInterface
     public function destroy(FileActionRequest $request): void;
     public function download(FileActionRequest $request): array;
     public function deleteForever($files): void;
+    public function restore($files): void;
 }

@@ -49,7 +49,7 @@ function Trash({ files }) {
 
     const loadMoreRef = useRef();
     const nextPage = useRef(files.links.next);
-    const { data, setData, delete: destroy, reset } = useForm({
+    const { data, setData, delete: destroy, patch, reset } = useForm({
         all: false,
         ids: [],
     });
@@ -98,7 +98,13 @@ function Trash({ files }) {
     };
 
     const restoreSelectedFile = () => {
-
+        patch(route('file.restore'), {
+            onFinish: () => {
+                reset();
+                reloadPage();
+                setSelected({});
+            }
+        });
     };
 
     const reloadPage = () => {
@@ -143,6 +149,7 @@ function Trash({ files }) {
         observer.observe(loadMoreRef.current);
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
     }, []);
+
     return (
         <div className="relative shadow-md sm:rounded-lg">
             <div className="flex items-center justify-between pb-4">

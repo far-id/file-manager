@@ -104,4 +104,19 @@ class FileController extends Controller
 
         return back();
     }
+
+    public function restore(TrashFileRequest $request)
+    {
+        $data = $request->validated();
+
+        if ($data['all']) {
+            $files = File::onlyTrashed()->get();
+        } else {
+            $files = File::onlyTrashed()->whereIn('id', $data['ids'] ?? [])->get();
+        }
+
+        $this->fileService->restore($files);
+
+        return back();
+    }
 }
