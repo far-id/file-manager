@@ -42,6 +42,7 @@ Route::controller(FileController::class)
     Route::delete('file/delete-forever', 'deleteForever')->name('file.deleteForever');
     Route::patch('file/restore', 'restore')->name('file.restore');
     Route::get('file/download', 'download')->name('file.download');
+    Route::patch('file/rename/{file}', 'rename')->name('file.rename');
     Route::post('file/favorite', 'favorite')->name('file.favorite');
     Route::get('trash', 'trash')->name('file.trash');
     Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');

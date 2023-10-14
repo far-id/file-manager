@@ -1,5 +1,6 @@
 import FileIcon from '@/Components/App/FileIcon';
 import IconButton from '@/Components/App/IconButton';
+import RenameFileModal from '@/Components/App/RenameFileModal';
 import { httpGet } from '@/Helper/http-helper';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
@@ -147,7 +148,6 @@ function MyFiles({ files, ancestors }) {
         allFiles.map(file => selected[file.id] = data.all);
         observer.observe(loadMoreRef.current);
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
-        console.log(allFiles)
     }, []);
 
     return (
@@ -227,9 +227,9 @@ function MyFiles({ files, ancestors }) {
                                             Last Modified
                                         </th>
                                         <th scope="col" className="px-6 py-3">
-                                            size
+                                            Size
                                         </th>
-                                        <th scope="col" className="px-6 py-3">
+                                        <th scope='col' className="px-6 py-3">
                                         </th>
                                     </tr>
                                 </thead>
@@ -266,8 +266,9 @@ function MyFiles({ files, ancestors }) {
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 { file.size === '0.00 B' ? (<div className='w-5 border-t border-b border-gray-200'></div>) : file.size }
                                             </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                <div className='invisible group-hover:visible'>
+                                            <td className="py-4 text-sm font-medium max-w-fit text-gray-900 whitespace-nowrap dark:text-white">
+                                                <div className='invisible group-hover:visible flex w-fit mx-auto justify-center items-center'>
+                                                    <RenameFileModal file={ file } />
                                                     { file.is_favorite ? (
                                                         <IconButton onClick={ () => favoriteSelectedFile(file.id, 'Removed from favorites') } title={ 'Remove from favorites' }>
                                                             <HiStar />

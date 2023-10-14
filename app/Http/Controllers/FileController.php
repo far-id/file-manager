@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileActionRequest;
+use App\Http\Requests\RenameFileRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFileRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Models\StarredFile;
 use App\Services\FileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FileController extends Controller
 {
@@ -20,7 +23,7 @@ class FileController extends Controller
     public function myFiles(Request $request, string $folder = null)
     {
         if ($folder) {
-            $folder = File::with('star')
+            $folder = File::with('starred')
                 ->where('path', $folder)
                 ->where('created_by', auth()->id())
                 ->firstOrFail();
@@ -116,6 +119,32 @@ class FileController extends Controller
         }
 
         $this->fileService->restore($files);
+
+        return back();
+    }
+
+    public function rename(RenameFileRequest $request, File $file)
+    {
+        $newPath = explode('/', $file->path);
+        $indexRenamePath = count($newPath) - 1;
+        $newPath[$indexRenamePath] = str($request->name)->slug();
+        $newPath = implode('/', $newPath);
+
+        $mime = $file->is_folder ? '' : explode('/', $file->mime)[1];
+        $name = $request->name . '.' . $mime;
+
+        DB::transaction(function ()
+        use ($file, $request, $newPath, $name, $mime) {
+            if ($file->is_folder) {
+                $name = $request->name;
+                $this->fileService->renameDescendants($file->descendants, $newPath);
+            }
+
+            $file->update([
+                'name' => $name,
+                'path' => $newPath . $mime
+            ]);
+        });
 
         return back();
     }

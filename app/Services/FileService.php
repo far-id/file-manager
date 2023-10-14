@@ -154,6 +154,16 @@ class FileService implements FileServiceInterface
         }
     }
 
+    public function renameDescendants($files, string $newPath)
+    {
+        foreach ($files as $file) {
+            $newPath = implode('/', array_replace(explode('/', $file->path), explode('/', $newPath)));
+            $file->update([
+                'path' => $newPath
+            ]);
+        }
+    }
+
     private function saveFileTree($fileTree, $parent, User $user): void
     {
         foreach ($fileTree as $name => $file) {
