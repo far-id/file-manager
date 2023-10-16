@@ -12,7 +12,7 @@ import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 export default function NewFolderModal() {
     const { folder } = usePage().props;
     const [showNewFolderModal, setShowNewFolderModal] = useState(false);
-    const { data, setData, post, processing, reset, errors, } = useForm({
+    const { data, setData, post, processing, reset, errors, clearErrors } = useForm({
         name: '',
         parent_id: folder.id
     });
@@ -24,7 +24,7 @@ export default function NewFolderModal() {
 
     const closeNewFolderModal = () => {
         setShowNewFolderModal(false);
-
+        clearErrors();
         reset();
     };
 
@@ -69,6 +69,7 @@ export default function NewFolderModal() {
                             className="block w-full mt-1"
                             isFocused
                             placeholder="Folder Name"
+                            required
                         />
 
                         <InputError message={ errors.name } className="mt-2" />

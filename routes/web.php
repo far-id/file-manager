@@ -45,8 +45,8 @@ Route::controller(FileController::class)
     Route::patch('file/rename/{file}', 'rename')->name('file.rename');
     Route::post('file/favorite', 'favorite')->name('file.favorite');
     Route::get('trash', 'trash')->name('file.trash');
+    Route::post('file/share', 'share')->name('file.share');
     Route::get('shared-with-me', 'sharedWithMe')->name('file.sharedWithMe');
-    Route::get('shared=by-me', 'sharedByMe')->name('file.SharedByMe');
     });
 
 

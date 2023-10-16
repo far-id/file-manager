@@ -1,13 +1,13 @@
 import FileIcon from '@/Components/App/FileIcon';
 import IconButton from '@/Components/App/IconButton';
 import RenameFileModal from '@/Components/App/RenameFileModal';
+import ShareFileModal from '@/Components/App/ShareFileModal';
 import { httpGet } from '@/Helper/http-helper';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { RELOAD_AFTER_UPLOAD, emitter } from '@/event-but';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { BsPersonPlusFill } from 'react-icons/bs';
 import { HiOutlineDownload, HiOutlineStar, HiStar } from 'react-icons/hi';
 import { IoMdClose, IoMdTrash } from 'react-icons/io';
 
@@ -18,10 +18,11 @@ function MyFiles({ files, ancestors }) {
 
     const loadMoreRef = useRef();
     const nextPage = useRef(files.links.next);
-    const { data, setData, delete: destroy, post, reset } = useForm({
+    const form = useForm({
         all: false,
         ids: [],
         parent_id: folder.id,
+        email: ''
     })
 
     const openFolder = (file) => {
@@ -32,13 +33,13 @@ function MyFiles({ files, ancestors }) {
     }
 
     const onSelectedAllChange = () => {
-        allFiles.map(file => selected[file.id] = !data.all);
-        setData('all', !data.all);
+        allFiles.map(file => selected[file.id] = !form.data.all);
+        form.setData('all', !form.data.all);
         setIdsWhenSelectedChange();
     };
 
     const setIdsWhenSelectedChange = () => {
-        setData(data => ({
+        form.setData(data => ({
             ...data,
             ids: Object.entries(selected).filter(selected => selected[1]).map(selected => selected[0])
         }));
@@ -49,18 +50,18 @@ function MyFiles({ files, ancestors }) {
     };
 
     const cancelSelect = () => {
-        reset();
+        form.reset();
         setSelected({});
     };
 
     const deleteSelectedFile = () => {
-        if (!data.all && data.ids.length === 0) {
+        if (!form.data.all && form.data.ids.length === 0) {
             retrun;
         }
 
-        destroy(route('file.destroy'), {
+        form.delete(route('file.destroy'), {
             onFinish: () => {
-                reset();
+                form.reset();
                 reloadPage();
                 setSelected({});
             }
@@ -68,7 +69,7 @@ function MyFiles({ files, ancestors }) {
     };
 
     const downloadSelectedFile = () => {
-        if (!data.all && data.ids.length === 0) {
+        if (!form.data.all && form.data.ids.length === 0) {
             retrun;
         }
 
@@ -77,10 +78,10 @@ function MyFiles({ files, ancestors }) {
             params.append('parent_id', folder?.id);
         }
 
-        if (data.all) {
-            params.append('all', data.all ? 1 : 0);
+        if (form.data.all) {
+            params.append('all', form.data.all ? 1 : 0);
         } else {
-            for (const id of data.ids) {
+            for (const id of form.data.ids) {
                 params.append('ids[]', id);
             }
         };
@@ -106,7 +107,7 @@ function MyFiles({ files, ancestors }) {
                 toast.success(successMessage);
             },
             onFinish: () => {
-                reset();
+                form.reset();
                 reloadPage();
                 setSelected({});
             }
@@ -121,7 +122,7 @@ function MyFiles({ files, ancestors }) {
                 break;
             }
         }
-        setData('all', checked);
+        form.setData('all', checked);
         setIdsWhenSelectedChange();
     }, [selected]);
 
@@ -145,7 +146,7 @@ function MyFiles({ files, ancestors }) {
             { rootMargin: '-250px 0px 0px 0px', }
         );
 
-        allFiles.map(file => selected[file.id] = data.all);
+        allFiles.map(file => selected[file.id] = form.data.all);
         observer.observe(loadMoreRef.current);
         emitter.on(RELOAD_AFTER_UPLOAD, reloadPage);
     }, []);
@@ -181,15 +182,13 @@ function MyFiles({ files, ancestors }) {
                             )) }
                         </ol>
                     </nav>
-                    <div className={ `relative ${data.ids.length < 1 && 'invisible'}` }>
+                    <div className={ `relative ${form.data.ids.length < 1 && 'invisible'}` }>
                             <div className="flex items-center px-2 rounded-full bg-gray-700/60 gap-x-1">
                             <IconButton onClick={ cancelSelect } title={ 'Unselect' }>
                                     <IoMdClose />
                                 </IconButton>
-                            <span className='text-xs'>{ data.ids.length } selected</span>
-                            <IconButton title={ 'Share' }>
-                                <BsPersonPlusFill />
-                            </IconButton>
+                            <span className='text-xs'>{ form.data.ids.length } selected</span>
+                            <ShareFileModal form={ form } />
                             <IconButton onClick={ deleteSelectedFile } title={ 'Move to trash' }>
                                 <IoMdTrash />
                             </IconButton>
@@ -209,9 +208,9 @@ function MyFiles({ files, ancestors }) {
                                             <div className="flex items-center">
                                                 <input
                                                     type="checkbox"
-                                                    checked={ data.all }
+                                                    checked={ form.data.all }
                                                     onChange={ onSelectedAllChange }
-                                                    value={ data.all }
+                                                    value={ form.data.all }
                                                     id="checkbox-all-search"
                                                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                 <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
@@ -237,13 +236,13 @@ function MyFiles({ files, ancestors }) {
                                     { allFiles.map((file, i) => (
                                         <tr key={ i } onClick={ () => onSelectFile(file) } onDoubleClick={ () => openFolder(file) }
                                             className={ `border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 group
-                                            ${selected[file.id] || data.all ? 'bg-blue-300 dark:bg-blue-900' : 'bg-white dark:bg-gray-800'}` }>
+                                            ${selected[file.id] || form.data.all ? 'bg-blue-300 dark:bg-blue-900' : 'bg-white dark:bg-gray-800'}` }>
                                             <td className="w-4 p-4">
                                                 <div className="flex items-center">
                                                     <span className='text-xl'>{ selected[file.id] }</span>
                                                     <input
                                                         type="checkbox"
-                                                        checked={ selected[file.id] || data.all }
+                                                        checked={ selected[file.id] || form.data.all }
                                                         onChange={ () => onSelectFile(file) }
                                                         id="checkbox-table-search-1"
                                                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />

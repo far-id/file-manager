@@ -184,12 +184,6 @@ export default function AuthLayout({ children }) {
                             </Link>
                         </li>
                         <li>
-                            <Link href={ route('file.SharedByMe') } className={ `${route().current('file.SharedByMe') && 'bg-gray-50 dark:bg-gray-900 shadow-lg'} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group` }>
-                                <FaShareSquare />
-                                <span className="flex-1 ml-3 whitespace-nowrap">Shared By Me</span>
-                            </Link>
-                        </li>
-                        <li>
                             <Link href={ route('file.trash') } className={ `${route().current('file.trash') && 'bg-gray-50 dark:bg-gray-900 shadow-lg'} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group` }>
                                 <FaTrash />
                                 <span className="flex-1 ml-3 whitespace-nowrap">Trash</span>

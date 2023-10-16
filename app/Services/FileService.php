@@ -7,6 +7,7 @@ use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Models\DownloadedFile;
 use App\Models\File;
+use App\Models\FileShared;
 use App\Models\StarredFile;
 use App\Models\User;
 use App\Services\Interface\FileServiceInterface;
@@ -160,6 +161,16 @@ class FileService implements FileServiceInterface
             $newPath = implode('/', array_replace(explode('/', $file->path), explode('/', $newPath)));
             $file->update([
                 'path' => $newPath
+            ]);
+        }
+    }
+
+    public function share($files, int $user_id): void
+    {
+        foreach ($files as $file) {
+            FileShared::create([
+                'file_id' => $file->id,
+                'user_id' => $user_id
             ]);
         }
     }

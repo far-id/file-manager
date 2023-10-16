@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 
 export default function RenameFileModal({ file }) {
     const [showRenameFileModal, setShowRenameFileModal] = useState(false);
-    const { data, setData, patch, processing, reset, errors, } = useForm({
+    const { data, setData, patch, processing, reset, errors, clearErrors } = useForm({
         id: file.id,
         name: file.name,
     });
@@ -25,6 +25,7 @@ export default function RenameFileModal({ file }) {
 
     const closeRenameModal = () => {
         setShowRenameFileModal(false);
+        clearErrors();
         reset();
     };
 
@@ -66,6 +67,7 @@ export default function RenameFileModal({ file }) {
                             className="block w-full mt-1"
                             isFocused
                             onFocus={ (e) => e.target.select() }
+                            required
                         />
 
                         <InputError message={ errors.name } className="mt-2" />

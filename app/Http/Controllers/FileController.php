@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FileActionRequest;
 use App\Http\Requests\RenameFileRequest;
+use App\Http\Requests\ShareFileRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFileRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Models\FileShared;
 use App\Models\StarredFile;
+use App\Models\User;
 use App\Services\FileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -152,6 +155,23 @@ class FileController extends Controller
     public function favorite(FileActionRequest $request)
     {
         $this->fileService->favorite($request->id);
+
+        return back();
+    }
+
+    public function share(ShareFileRequest $request)
+    {
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        $user = User::whereEmail($data['email'])->first();
+        if ($data['all']) {
+            $files = $parent->children;
+        } else {
+            $files = File::whereIn('id', $data['ids'])->get();
+        }
+
+        $this->fileService->share($files, $user->id);
 
         return back();
     }
