@@ -175,6 +175,21 @@ class FileService implements FileServiceInterface
         }
     }
 
+    public function travelDescendants($files, string $ulid): File|null
+    {
+        foreach ($files->get() as $file) {
+            if ($file->ulid == $ulid) {
+                return $file;
+            }
+            foreach ($file->descendants as $descendant) {
+                if ($descendant->ulid == $ulid) {
+                    return $descendant;
+                }
+            }
+        }
+        return null;
+    }
+
     private function saveFileTree($fileTree, $parent, User $user): void
     {
         foreach ($fileTree as $name => $file) {

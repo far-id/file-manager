@@ -3,18 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kalnoy\Nestedset\NodeTrait;
 
 class File extends Model
 {
-    use HasFactory, NodeTrait, SoftDeletes;
+    use HasFactory, NodeTrait, SoftDeletes, HasUlids;
 
     protected $fillable = ['name', 'is_folder', 'path', 'storage_path'];
+
+    public function uniqueIds(): array
+    {
+        return ['ulid'];         //your new column name
+    }
 
     public function user(): BelongsTo
     {
@@ -30,6 +37,11 @@ class File extends Model
     {
         return $this->hasOne(StarredFile::class)
             ->where('user_id', auth()->id());
+    }
+
+    public function shared(): HasMany
+    {
+        return $this->hasMany(FileShared::class);
     }
 
     public function isOwnedBy(int $userId): bool

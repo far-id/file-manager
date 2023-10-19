@@ -10,8 +10,6 @@ use App\Http\Requests\StoreFolderRequest;
 use App\Http\Requests\TrashFileRequest;
 use App\Http\Resources\FileResource;
 use App\Models\File;
-use App\Models\FileShared;
-use App\Models\StarredFile;
 use App\Models\User;
 use App\Services\FileService;
 use Illuminate\Http\Request;
@@ -174,5 +172,26 @@ class FileController extends Controller
         $this->fileService->share($files, $user->id);
 
         return back();
+    }
+
+    public function sharedWithMe(string $folder = null)
+    {
+        $files = File::whereHas('shared', function ($q) {
+            $q->where('user_id', auth()->id());
+        });
+
+        if ($folder) {
+            $folder = $this->fileService->travelDescendants($files, $folder);
+            abort_if($folder == null, 404);
+            $files = File::where('parent_id', $folder->id);
+        }
+
+        $files = $files->orderBy('is_folder', 'desc')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+        $files = FileResource::collection($files);
+
+        return inertia('SharedWithMe', compact('files', 'folder'));
     }
 }
