@@ -13,6 +13,7 @@ use App\Models\File;
 use App\Models\User;
 use App\Services\FileService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Benchmark;
 use Illuminate\Support\Facades\DB;
 
 class FileController extends Controller
@@ -193,5 +194,26 @@ class FileController extends Controller
         $files = FileResource::collection($files);
 
         return inertia('SharedWithMe', compact('files', 'folder'));
+    }
+
+    public function something()
+    {
+        $id = 3;
+        $ulid = '01hd20ywywbamh1pnmhm357ewj';
+
+        Benchmark::dd([
+            'id' => function () use ($id) {
+                File::with('shared')
+                ->where('id', $id)
+                    ->where('created_by', auth()->id())
+                    ->first();
+            },
+            'ulid' => function () use ($ulid) {
+                File::with('shared')
+                ->where('ulid', $ulid)
+                    ->where('created_by', auth()->id())
+                    ->first();
+            }
+        ], 100);
     }
 }

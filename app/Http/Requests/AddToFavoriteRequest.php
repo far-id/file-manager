@@ -26,7 +26,7 @@ class AddToFavoriteRequest extends FormRequest
             'id' => [
                 'required',
                 Rule::exists('files', 'id')
-                    ->where('created_by', auth()->id())
+                    ->where(fn ($q) => $q->where('created_by', auth()->id()))
             ]
         ];
     }
