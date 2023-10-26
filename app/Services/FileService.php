@@ -167,12 +167,14 @@ class FileService implements FileServiceInterface
 
     public function share($files, int $user_id): void
     {
+        $data  = [];
         foreach ($files as $file) {
-            FileShared::create([
+            $data[] = [
                 'file_id' => $file->id,
                 'user_id' => $user_id
-            ]);
+            ];
         }
+        FileShared::insert($data);
     }
 
     public function travelDescendants($files, string $ulid): File|null
