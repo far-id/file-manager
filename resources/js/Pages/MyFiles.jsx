@@ -249,9 +249,9 @@ function MyFiles({ files, ancestors }) {
                                                     <label htmlFor="checkbox-table-search-1" className="sr-only">checkbox</label>
                                                 </div>
                                             </td>
-                                            <th scope="row" className="flex items-center gap-2 px-6 py-4 pl-0 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <th scope="row" className="flex items-center max-w-md gap-2 px-6 py-4 pl-0 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 <FileIcon file={ file } />
-                                                { file.name }
+                                                <span className="truncate hover:overflow-visible">{ file.name }</span>
                                                 { file.is_favorite && (
                                                     <HiStar />
                                                 ) }
@@ -265,8 +265,8 @@ function MyFiles({ files, ancestors }) {
                                             <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                 { file.size === '0.00 B' ? (<div className='w-5 border-t border-b border-gray-200'></div>) : file.size }
                                             </td>
-                                            <td className="py-4 text-sm font-medium max-w-fit text-gray-900 whitespace-nowrap dark:text-white">
-                                                <div className='invisible group-hover:visible flex w-fit mx-auto justify-center items-center'>
+                                            <td className="py-4 text-sm font-medium text-gray-900 max-w-fit whitespace-nowrap dark:text-white">
+                                                <div className='flex items-center justify-center invisible mx-auto group-hover:visible w-fit'>
                                                     <RenameFileModal file={ file } />
                                                     { file.is_favorite ? (
                                                         <IconButton onClick={ () => favoriteSelectedFile(file.id, 'Removed from favorites') } title={ 'Remove from favorites' }>
