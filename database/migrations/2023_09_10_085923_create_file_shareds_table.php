@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(File::class);
             $table->foreignIdFor(User::class);
+            $table->unique(['file_id', 'user_id']);
             $table->timestamps();
         });
     }

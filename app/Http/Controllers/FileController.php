@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FileActionRequest;
 use App\Http\Requests\RenameFileRequest;
+use App\Http\Requests\SharedFileActionRequest;
 use App\Http\Requests\ShareFileRequest;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\StoreFolderRequest;
@@ -13,8 +14,8 @@ use App\Models\File;
 use App\Models\User;
 use App\Services\FileService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Benchmark;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class FileController extends Controller
 {
@@ -74,7 +75,68 @@ class FileController extends Controller
 
     public function download(FileActionRequest $request): array
     {
-        return $this->fileService->download($request);
+        $data = $request->validated();
+        $parent = $request->parent;
+
+        $all = $data['all'] ?? false;
+        $ids = $data['ids'] ?? [];
+
+        if (!$all && empty($ids)) {
+            return ['message' => 'please select files to download'];
+        }
+
+        if ($all) {
+            $url = $this->fileService->createZip($parent->children);
+            $filename = $parent->name . '.zip';
+        } else {
+            [$url, $filename] = $this->fileService->getDownloadUrl($ids, $parent->name);
+        }
+
+        return [
+            'url' => $url,
+            'filename' => $filename
+        ];
+    }
+
+    public function downloadSharedWithMe(SharedFileActionRequest $request): array
+    {
+        $data = $request->validated();
+
+        $all = $data['all'] ?? false;
+        $ids = $data['ids'] ?? [];
+        $parent_ulid = $request->parent_ulid;
+
+        if (!$all && empty($ids)) {
+            return ['message' => 'please select files to download'];
+        }
+
+        if ($all) {
+            if ($parent_ulid) {
+                $folder = File::where('ulid', $parent_ulid)->firstOrFail();
+
+                $url = $this->fileService->createZip($folder->children);
+                $filename = $folder->name . '.zip';
+            } else {
+                $files = File::whereHas('shared', function ($q) {
+                    $q->where('user_id', auth()->id());
+                })->get();
+
+                $url = $this->fileService->createZip($files);
+                $filename = 'shared_with_me.zip';
+            }
+        } else {
+            [$url, $filename] = $this->fileService->getDownloadUrl($ids, 'shared_with_me');
+        }
+
+        return [
+            'url' => $url,
+            'filename' => $filename
+        ];
+    }
+
+    public function emailDownloadSharedWithMe(SharedFileActionRequest $request)
+    {
+        return redirect()->to($this->downloadSharedWithMe($request)['url']);
     }
 
     public function trash(Request $request)
@@ -172,6 +234,8 @@ class FileController extends Controller
 
         $this->fileService->share($files, $user->id);
 
+        Mail::to($data['email'])->send(new \App\Mail\SharedFileWithYou(auth()->user(), $files));
+
         return back();
     }
 
@@ -194,26 +258,5 @@ class FileController extends Controller
         $files = FileResource::collection($files);
 
         return inertia('SharedWithMe', compact('files', 'folder'));
-    }
-
-    public function something()
-    {
-        $id = 3;
-        $ulid = '01hd20ywywbamh1pnmhm357ewj';
-
-        Benchmark::dd([
-            'id' => function () use ($id) {
-                File::with('shared')
-                ->where('id', $id)
-                    ->where('created_by', auth()->id())
-                    ->first();
-            },
-            'ulid' => function () use ($ulid) {
-                File::with('shared')
-                ->where('ulid', $ulid)
-                    ->where('created_by', auth()->id())
-                    ->first();
-            }
-        ], 100);
     }
 }

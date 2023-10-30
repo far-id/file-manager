@@ -15,7 +15,10 @@ class FileActionRequest extends ParentIdBaseRequest
     {
         return array_merge(parent::rules(), [
             'all' => ['nullable', 'bool'],
-            'ids.*' => Rule::exists('files', 'id')->where('created_by', auth()->id()),
+            'ids.*' => Rule::exists('files', 'id')
+            ->where(function ($query) {
+                $query->where('created_by', auth()->id());
+            })
         ]);
     }
 }

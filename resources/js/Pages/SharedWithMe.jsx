@@ -21,7 +21,7 @@ function SharedWithMe({ files }) {
     const form = useForm({
         all: false,
         ids: [],
-        parent_id: folder?.id,
+        parent_ulid: folder?.ulid,
         email: ''
     });
 
@@ -74,8 +74,8 @@ function SharedWithMe({ files }) {
         }
 
         const params = new URLSearchParams();
-        if (folder?.id) {
-            params.append('parent_id', folder?.id);
+        if (folder?.ulid) {
+            params.append('parent_ulid', folder?.ulid);
         }
 
         if (form.data.all) {
@@ -86,7 +86,7 @@ function SharedWithMe({ files }) {
             }
         };
 
-        httpGet(route('file.download') + '?' + params.toString())
+        httpGet(route('file.downloadSharedWithMe') + '?' + params.toString())
             .then(res => {
                 if (!res.url) return;
 

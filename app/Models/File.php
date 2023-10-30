@@ -49,6 +49,11 @@ class File extends Model
         return $this->created_by == $userId;
     }
 
+    public function isSharedTo(int $userId): bool
+    {
+        return $this->shared()->where('user_id', $userId)->exists();
+    }
+
     public function isRoot(): bool
     {
         return $this->parent_id === null;

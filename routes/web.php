@@ -49,9 +49,9 @@ Route::controller(FileController::class)
     Route::get('shared-with-me/{folder?}', 'sharedWithMe')
     ->where('folder', '(.*)')
     ->name('file.sharedWithMe');
-    Route::get('something', 'something');
+    Route::get('file/download-shared-with-me', 'downloadSharedWithMe')->name('file.downloadSharedWithMe');
+    Route::get('file/email/download-shared-with-me', 'emailDownloadSharedWithMe')->name('file.emailDownloadSharedWithMe');
     });
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

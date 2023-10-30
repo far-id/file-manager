@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Services\Interface\FileServiceInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use ZipArchive;
 
 class FileService implements FileServiceInterface
 {
@@ -78,53 +77,61 @@ class FileService implements FileServiceInterface
         }
     }
 
-    public function download(FileActionRequest $request): array
+    public function getDownloadUrl(array $ids, $zipName): array
     {
-        $data = $request->validated();
-        $parent = $request->parent;
-
-        $all = $data['all'] ?? false;
-        $ids = $data['ids'] ?? [];
-
-        if (!$all && empty($ids)) {
-            return ['message' => 'please select files to download'];
-        }
-
-        if ($all) {
-            $url = $this->createZip($parent->children);
-            $filename = $parent->name . '.zip';
-        } else {
-            if (count($ids) === 1) {
-                $file = File::findOrFail($ids[0]);
-                if ($file->is_folder) {
-                    if ($file->children->count() === 0) {
-                        return ['message' => 'the folder is empty'];
-                    }
-                    $url = $this->createZip($file->children);
-                    $filename = $file->name . '.zip';
-                } else {
-                    $destination = 'public/' . pathinfo($file->storage_path, PATHINFO_BASENAME);
-                    Storage::copy($file->storage_path, $destination);
-
-                    DownloadedFile::create([
-                        'storage_path' => $destination,
-                        'created_by' => auth()->id()
-                    ]);
-
-                    $url = asset(Storage::url($destination));
-                    $filename = $file->name;
+        if (count($ids) === 1) {
+            $file = File::findOrFail($ids[0]);
+            if ($file->is_folder) {
+                if ($file->children->count() === 0) {
+                    return ['message' => 'the folder is empty'];
                 }
+                $url = $this->createZip($file->children);
+                $filename = $file->name . '.zip';
             } else {
-                $files = File::whereIn('id', $ids)->get();
-                $url = $this->createZip($files);
-                $filename = $parent->name . '.zip';
+                $destination = 'public/' . pathinfo($file->storage_path, PATHINFO_BASENAME);
+                Storage::copy($file->storage_path, $destination);
+
+                DownloadedFile::create([
+                    'storage_path' => $destination,
+                    'created_by' => auth()->id()
+                ]);
+
+                $url = asset(Storage::url($destination));
+                $filename = $file->name;
             }
+        } else {
+            $files = File::whereIn('id', $ids)->get();
+            $url = $this->createZip($files);
+            $filename = $zipName . '.zip';
         }
 
-        return [
-            'url' => $url,
-            'filename' => $filename
-        ];
+        return [$url, $filename];
+    }
+
+    public function createZip($files): string
+    {
+        $zipPath = 'zip/' . str()->random() . '.zip';
+        $publicPath = "public/$zipPath";
+
+        if (!is_dir(dirname($publicPath))) {
+            Storage::makeDirectory(dirname($publicPath));
+        }
+
+        $zipFile = Storage::path($publicPath);
+        $zip  = new \ZipArchive;
+
+        if ($zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            $this->addFilesToZip($zip, $files);
+        }
+
+        $zip->close();
+
+        DownloadedFile::create([
+            'storage_path' => $publicPath,
+            'created_by' => auth()->id()
+        ]);
+
+        return asset(Storage::url($zipPath));
     }
 
     public function deleteForever($files): void
@@ -155,7 +162,7 @@ class FileService implements FileServiceInterface
         }
     }
 
-    public function renameDescendants($files, string $newPath)
+    public function renameDescendants($files, string $newPath): void
     {
         foreach ($files as $file) {
             $newPath = implode('/', array_replace(explode('/', $file->path), explode('/', $newPath)));
@@ -171,10 +178,12 @@ class FileService implements FileServiceInterface
         foreach ($files as $file) {
             $data[] = [
                 'file_id' => $file->id,
-                'user_id' => $user_id
+                'user_id' => $user_id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
-        FileShared::insert($data);
+        FileShared::insertOrIgnore($data);
     }
 
     public function travelDescendants($files, string $ulid): File|null
@@ -219,33 +228,7 @@ class FileService implements FileServiceInterface
         $parent->appendNode($model);
     }
 
-    private function createZip($files): string
-    {
-        $zipPath = 'zip/' . str()->random() . '.zip';
-        $publicPath = "public/$zipPath";
-
-        if (!is_dir(dirname($publicPath))) {
-            Storage::makeDirectory(dirname($publicPath));
-        }
-
-        $zipFile = Storage::path($publicPath);
-        $zip  = new ZipArchive;
-
-        if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            $this->addFilesToZip($zip, $files);
-        }
-
-        $zip->close();
-
-        DownloadedFile::create([
-            'storage_path' => $publicPath,
-            'created_by' => auth()->id()
-        ]);
-
-        return asset(Storage::url($zipPath));
-    }
-
-    private function addFilesToZip(ZipArchive $zip, $files, string $ancestors = ''): void
+    private function addFilesToZip(\ZipArchive $zip, $files, string $ancestors = ''): void
     {
         foreach ($files as $file) {
             if ($file->is_folder) {
